@@ -163,6 +163,11 @@
       animation: menuIn .18s ease-out;
     }
     @keyframes menuIn { from { opacity: 0; } }
+    .menu-cab { cursor: grab; touch-action: none; user-select: none; }
+    .menu-cab .asa { color: var(--tenue); font-size: 14px; letter-spacing: -1px; flex-shrink: 0; }
+    .menu-hab.arrastrando { cursor: grabbing; opacity: .92; box-shadow: 0 16px 36px rgba(0,0,0,.7), 0 0 18px rgba(240,160,48,.4); }
+    .menu-hab.arrastrando .menu-cab { cursor: grabbing; }
+    .menu-hab.fijo { border-style: dashed; }
     .menu-cab { display: flex; align-items: center; gap: 8px; padding-bottom: 7px; margin-bottom: 7px; border-bottom: 2px solid #22322b; }
     .menu-cab .cara { width: 32px; height: 32px; border-radius: 50%; background: #2b3b34; border: 2px solid #3a4c44; display: grid; place-items: center; overflow: hidden; flex-shrink: 0; }
     .menu-cab .cerrar { background: none; border: none; color: var(--tenue); cursor: pointer; font-size: 15px; padding: 2px 4px; }
@@ -1750,6 +1755,8 @@ function seleccionar(id) {
 function cerrarMenu() {
   seleccionado = null;
   modoRelacion = null;
+  menuPos = null;
+  $('menu-hab').classList.remove('fijo');
   $('menu-hab').classList.add('oculto');
   construirRed();
   actualizarLista();
@@ -1781,7 +1788,8 @@ function renderMenu() {
   const r = resumenRelaciones(s.id);
   const boton = (modo, texto) => `<button class="opc ${modoRelacion === modo ? 'activa' : ''}" onclick="verRelaciones('${modo}')">${texto}</button>`;
   menu.innerHTML = `
-    <div class="menu-cab">
+    <div class="menu-cab" title="Arrastra para mover · doble clic para que vuelva a seguir al personaje">
+      <span class="asa">⠿</span>
       <div class="cara">${caraHtml(s.id, 26)}</div>
       <div style="min-width:0; flex:1">
         <div style="color:${info.color}; font-size:15px">${esc(nombre(s.id))}</div>
@@ -1824,6 +1832,13 @@ function posicionarMenu() {
   const p = pt.matrixTransform(ctm);
   const caja = $('mapa-cont').getBoundingClientRect();
   const w = menu.offsetWidth, h = menu.offsetHeight;
+  if (menuPos) {
+    // El usuario lo dejó en un lugar: se respeta (solo se mantiene dentro del mapa)
+    menuPos.x = Math.max(4, Math.min(caja.width - w - 4, menuPos.x));
+    menuPos.y = Math.max(4, Math.min(caja.height - h - 4, menuPos.y));
+    menu.style.transform = `translate(${Math.round(menuPos.x)}px, ${Math.round(menuPos.y)}px)`;
+    return;
+  }
   if (modoRelacion) {
     // Mientras se miran las relaciones, el menú se aparta a la esquina para no tapar flechas
     menu.style.transform = `translate(${Math.round(caja.width - w - 10)}px, 10px)`;
@@ -1836,6 +1851,49 @@ function posicionarMenu() {
   x = Math.max(8, x);
   menu.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
 }
+
+// ---- Menú desplazable: se arrastra desde la cabecera ----
+let menuPos = null;      // {x, y} relativo al mapa cuando el usuario lo movió; null = sigue al personaje
+let arrastreMenu = null; // datos del arrastre en curso
+(() => {
+  const menu = $('menu-hab');
+  menu.addEventListener('pointerdown', (ev) => {
+    const cab = ev.target.closest('.menu-cab');
+    if (!cab || ev.target.closest('button') || ev.button !== 0) return;
+    const caja = $('mapa-cont').getBoundingClientRect();
+    const r = menu.getBoundingClientRect();
+    arrastreMenu = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, dx: ev.clientX - r.left, dy: ev.clientY - r.top, caja, activo: false };
+    ev.preventDefault();
+  });
+  menu.addEventListener('pointermove', (ev) => {
+    if (!arrastreMenu || ev.pointerId !== arrastreMenu.id) return;
+    if (!arrastreMenu.activo) {
+      // Solo se considera arrastre tras moverse unos píxeles (así el doble clic sigue funcionando)
+      if (Math.hypot(ev.clientX - arrastreMenu.x0, ev.clientY - arrastreMenu.y0) < 4) return;
+      arrastreMenu.activo = true;
+      menu.setPointerCapture(ev.pointerId);
+      menu.classList.add('arrastrando');
+    }
+    const { caja, dx, dy } = arrastreMenu;
+    menuPos = { x: ev.clientX - caja.left - dx, y: ev.clientY - caja.top - dy };
+    menu.classList.add('fijo');
+    posicionarMenu();
+  });
+  const soltar = (ev) => {
+    if (!arrastreMenu || ev.pointerId !== arrastreMenu.id) return;
+    arrastreMenu = null;
+    menu.classList.remove('arrastrando');
+  };
+  menu.addEventListener('pointerup', soltar);
+  menu.addEventListener('pointercancel', soltar);
+  // Doble clic en la cabecera: el menú vuelve a seguir al personaje
+  menu.addEventListener('dblclick', (ev) => {
+    if (!ev.target.closest('.menu-cab') || ev.target.closest('button')) return;
+    menuPos = null;
+    menu.classList.remove('fijo');
+    posicionarMenu();
+  });
+})();
 
 function actualizarFicha() {
   const cont = $('ficha');
