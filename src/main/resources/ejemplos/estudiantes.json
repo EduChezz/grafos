@@ -1,0 +1,54 @@
+{
+  "usuarios": [
+    { "id": 1,  "nombre": "Ana",      "carrera": "Software",       "semestre": 4, "edad": 20, "correo": "ana@uni.edu",      "x": 120, "y": 120 },
+    { "id": 2,  "nombre": "Bruno",    "carrera": "Software",       "semestre": 4, "edad": 21, "correo": "bruno@uni.edu",    "x": 270, "y": 90 },
+    { "id": 3,  "nombre": "Carla",    "carrera": "Software",       "semestre": 4, "edad": 20, "correo": "carla@uni.edu",    "x": 110, "y": 270 },
+    { "id": 4,  "nombre": "Diego",    "carrera": "Software",       "semestre": 5, "edad": 22, "correo": "diego@uni.edu",    "x": 260, "y": 240 },
+    { "id": 5,  "nombre": "Elena",    "carrera": "Telecomunicaciones", "semestre": 3, "edad": 19, "correo": "elena@uni.edu", "x": 420, "y": 170 },
+    { "id": 6,  "nombre": "Fabián",   "carrera": "Telecomunicaciones", "semestre": 3, "edad": 20, "correo": "fabian@uni.edu", "x": 540, "y": 80 },
+    { "id": 7,  "nombre": "Gaby",     "carrera": "Telecomunicaciones", "semestre": 3, "edad": 19, "correo": "gaby@uni.edu",   "x": 560, "y": 250 },
+    { "id": 8,  "nombre": "Hugo",     "carrera": "Telecomunicaciones", "semestre": 4, "edad": 21, "correo": "hugo@uni.edu",   "x": 420, "y": 330 },
+    { "id": 9,  "nombre": "Isabel",   "carrera": "Telecomunicaciones", "semestre": 2, "edad": 18, "correo": "isabel@uni.edu", "x": 570, "y": 420 },
+    { "id": 10, "nombre": "Jorge",    "carrera": "Industrial",     "semestre": 6, "edad": 23, "correo": "jorge@uni.edu",    "x": 700, "y": 460 },
+    { "id": 11, "nombre": "Karen",    "carrera": "Industrial",     "semestre": 6, "edad": 22, "correo": "karen@uni.edu",    "x": 800, "y": 360 },
+    { "id": 12, "nombre": "Luis",     "carrera": "Industrial",     "semestre": 5, "edad": 22, "correo": "luis@uni.edu",     "x": 690, "y": 300 },
+    { "id": 13, "nombre": "María",    "carrera": "Industrial",     "semestre": 6, "edad": 23, "correo": "maria@uni.edu",    "x": 800, "y": 210 },
+    { "id": 14, "nombre": "Nicolás",  "carrera": "Industrial",     "semestre": 7, "edad": 24, "correo": "nicolas@uni.edu",  "x": 700, "y": 110 },
+    { "id": 15, "nombre": "Olivia",   "carrera": "Diseño",         "semestre": 1, "edad": 18, "correo": "olivia@uni.edu",   "x": 260, "y": 430 }
+  ],
+  "relaciones": [
+    { "a": 1, "b": 2, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 5, "pesoBA": 5 },
+    { "a": 1, "b": 3, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 4, "pesoBA": 3 },
+    { "a": 1, "b": 4, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 1, "pesoBA": 2 },
+    { "a": 2, "b": 3, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 3 },
+    { "a": 2, "b": 4, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 5, "pesoBA": 4 },
+    { "a": 3, "b": 4, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 2 },
+
+    { "a": 4, "b": 5, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 3 },
+
+    { "a": 5, "b": 6, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 4, "pesoBA": 4 },
+    { "a": 5, "b": 7, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 2 },
+    { "a": 5, "b": 8, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 3 },
+    { "a": 6, "b": 7, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 5, "pesoBA": 5 },
+    { "a": 6, "b": 8, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 2 },
+    { "a": 7, "b": 8, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 4 },
+    { "a": 7, "b": 9, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 4, "pesoBA": 4 },
+    { "a": 8, "b": 9, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 3 },
+    { "a": 6, "b": 9, "tipoAB": "ENEMISTAD", "tipoBA": "DESCONOCIDO" },
+
+    { "a": 9, "b": 10, "tipoAB": "AMISTAD", "tipoBA": "DESCONOCIDO", "pesoAB": 2 },
+
+    { "a": 10, "b": 11, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 3 },
+    { "a": 10, "b": 12, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 4, "pesoBA": 4 },
+    { "a": 11, "b": 12, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 3 },
+    { "a": 11, "b": 13, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 2 },
+    { "a": 12, "b": 13, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 5, "pesoBA": 5 },
+    { "a": 12, "b": 14, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 2 },
+    { "a": 13, "b": 14, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 4, "pesoBA": 3 },
+    { "a": 10, "b": 14, "tipoAB": "ENEMISTAD", "tipoBA": "ENEMISTAD" },
+
+    { "a": 15, "b": 1, "tipoAB": "AMISTAD", "tipoBA": "DESCONOCIDO", "pesoAB": 3 },
+    { "a": 15, "b": 8, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 1 },
+    { "a": 3, "b": 15, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 4 }
+  ]
+}

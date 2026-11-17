@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refugio Social AP-4</title>
+  <!-- Fuente pixelada opcional: si no hay internet se usa la del sistema -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --fondo: #0b0f0e;
+      --panel: #111c18;
+      --panel-2: #172520;
+      --marco: #2e3f37;
+      --marco-claro: #43584d;
+      --bronce: #9a7442;
+      --texto: #ece6c8;
+      --tenue: #95a99d;
+      --verde: #5be36b;
+      --verde-osc: #2a7a3a;
+      --naranja: #f0a030;
+      --rojo: #e5484d;
+      --azul: #59c2e6;
+      --oro: #ffd54a;
+      --pixel: "Pixelify Sans", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: #070a09;
+      color: var(--texto);
+      font-family: var(--pixel);
+      font-size: 14px;
+      display: flex; flex-direction: column;
+      min-height: 100vh;
+    }
+    button, select, input { font-family: inherit; font-size: 13px; color: inherit; }
+    a { color: var(--azul); }
+    .oculto { display: none !important; }
+
+    /* ---------- Marcos metálicos ---------- */
+    .marco {
+      position: relative;
+      background: linear-gradient(180deg, #19291f 0%, #101a16 100%);
+      border: 3px solid var(--marco);
+      border-radius: 10px;
+      box-shadow: inset 0 0 0 2px #08100c, inset 0 2px 0 3px rgba(255,255,255,.03), 0 8px 22px rgba(0,0,0,.55);
+    }
+    .marco::before, .marco::after {
+      content: ""; position: absolute; width: 16px; height: 16px; pointer-events: none;
+      border-color: var(--bronce); border-style: solid;
+    }
+    .marco::before { top: -5px; left: -5px; border-width: 4px 0 0 4px; border-radius: 6px 0 0 0; }
+    .marco::after { bottom: -5px; right: -5px; border-width: 0 4px 4px 0; border-radius: 0 0 6px 0; }
+    .titulo-marco { font-size: 15px; color: var(--texto); text-align: center; letter-spacing: .02em; margin: 0; }
+    .sub { color: var(--tenue); font-size: 12px; }
+
+    .btn {
+      background: linear-gradient(180deg, #2a3a32, #1d2a24); border: 2px solid var(--marco-claro); border-radius: 7px;
+      padding: 6px 11px; cursor: pointer; font-weight: 600;
+      transition: border-color .15s, box-shadow .15s, transform .08s, filter .15s;
+    }
+    .btn:hover { border-color: var(--verde); box-shadow: 0 0 10px rgba(91,227,107,.25); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-verde { background: linear-gradient(180deg, #2f7a3c, #1f5a2b); border-color: #4fbf5f; color: #eaffea; }
+    .btn-naranja { background: linear-gradient(180deg, #8a5a1a, #6a4310); border-color: #f0a030; color: #fff1d6; }
+    .btn-rojo { background: linear-gradient(180deg, #7a2a2a, #561a1a); border-color: #e5484d; color: #ffe1e1; }
+    .btn-azul { background: linear-gradient(180deg, #1f5a74, #143f52); border-color: #59c2e6; color: #e3f7ff; }
+    .btn-mini { padding: 3px 8px; font-size: 12px; }
+    .ancho { width: 100%; }
+    .campo { width: 100%; background: #0a120f; border: 2px solid var(--marco); border-radius: 6px; padding: 6px 8px; outline: none; }
+    .campo:focus { border-color: var(--verde); }
+    label.etq { display: block; font-size: 12px; color: var(--tenue); margin: 0 0 3px; }
+    .fila { display: flex; gap: 8px; align-items: center; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .nota { color: var(--tenue); font-size: 12.5px; line-height: 1.45; margin: 0 0 8px; }
+    .insignia { display: inline-block; padding: 1px 7px; border-radius: 5px; font-size: 12px; font-weight: 700; }
+    .barra { height: 9px; background: #0a120f; border: 1px solid var(--marco); border-radius: 4px; overflow: hidden; }
+    .barra > span { display: block; height: 100%; transition: width .6s cubic-bezier(.22,1,.36,1); }
+
+    /* ---------- HUD ---------- */
+    header.hud {
+      display: grid; grid-template-columns: auto auto auto minmax(260px, 1fr) auto; gap: 10px;
+      padding: 10px 12px 8px; background: linear-gradient(180deg, #121b17, #0b110e);
+      border-bottom: 2px solid #1c2924;
+    }
+    .hud-caja { padding: 6px 12px; display: flex; flex-direction: column; justify-content: center; min-height: 64px; }
+    .hud-dia { min-width: 128px; text-align: center; }
+    .hud-dia .valor { font-size: 32px; font-weight: 700; color: #e9f5d0; line-height: 1; text-shadow: 0 2px 0 #0a120f; }
+    .hud-dia .icono { font-size: 13px; color: var(--verde); }
+    .recursos { display: flex; gap: 10px; margin-top: 4px; justify-content: center; }
+    .recurso { display: flex; flex-direction: column; align-items: center; font-size: 12px; min-width: 34px; }
+    .recurso b { font-size: 15px; }
+    .tension-titulo { color: #ff9a6a; font-size: 15px; text-align: center; }
+    .segmentos { display: grid; grid-template-columns: repeat(18, 9px); gap: 3px; margin-top: 6px; }
+    .segmentos span { height: 22px; border-radius: 2px; background: #2a1a1a; box-shadow: inset 0 -3px 0 rgba(0,0,0,.25); transition: background .4s; }
+    .hud-titulo { align-items: center; padding: 6px 20px; }
+    .hud-titulo h1 {
+      margin: 0; font-size: clamp(18px, 2vw, 28px); font-weight: 600; color: #f4ecc6; text-align: center;
+      text-shadow: 0 2px 0 #0a120f, 0 0 14px rgba(240,200,120,.18);
+    }
+    .barra-titulo { width: 60%; height: 6px; margin-top: 6px; border-radius: 3px; background: #2a2016; overflow: hidden; }
+    .barra-titulo span { display: block; height: 100%; background: linear-gradient(90deg, #f07a20, #ffb347); transition: width .6s; }
+    .hud-controles { display: grid; grid-template-columns: repeat(3, auto); gap: 6px; align-content: center; padding: 8px 10px; }
+
+    /* ---------- Escena ---------- */
+    main.escena {
+      flex: 1; min-height: 0;
+      display: grid; grid-template-columns: 250px minmax(0, 1fr) 370px; gap: 12px; padding: 12px;
+    }
+    .panel-lat { display: flex; flex-direction: column; min-height: 0; padding: 10px; }
+    .panel-cab { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 8px; border-bottom: 2px solid #1d2b25; margin-bottom: 8px; }
+    .panel-cab h2 { margin: 0; font-size: 18px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .desplazable { overflow-y: auto; min-height: 0; flex: 1; padding-right: 3px; }
+    .desplazable::-webkit-scrollbar { width: 8px; }
+    .desplazable::-webkit-scrollbar-thumb { background: #2e3f37; border-radius: 4px; }
+
+    /* Lista de habitantes */
+    .habitante {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px; margin-bottom: 6px; cursor: pointer;
+      background: linear-gradient(180deg, #1b2a24, #15211c); border: 2px solid #253630; border-radius: 6px;
+      transition: border-color .15s, transform .1s;
+    }
+    .habitante:hover { border-color: var(--marco-claro); transform: translateX(2px); }
+    .habitante.sel { border-color: var(--naranja); box-shadow: 0 0 10px rgba(240,160,48,.35); }
+    .habitante .cara { width: 28px; height: 28px; border-radius: 50%; background: #2b3b34; border: 2px solid #3a4c44; overflow: hidden; flex-shrink: 0; display: grid; place-items: center; }
+    .habitante .nom { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+    .habitante .est { font-size: 15px; width: 18px; text-align: center; }
+    .leyenda { border-top: 2px solid #1d2b25; padding-top: 8px; margin-top: 6px; font-size: 12px; color: var(--tenue); line-height: 1.7; }
+    .leyenda i { display: inline-block; width: 22px; vertical-align: middle; margin-right: 6px; }
+
+    /* Mapa */
+    .mapa-cont { position: relative; min-height: 0; overflow: hidden; border-radius: 10px; background: #3a281e; border: 3px solid #241913; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+    .mapa-cont > svg#mapa { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .banner-crisis {
+      position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 5;
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px;
+      background: rgba(50,10,10,.93); border: 2px solid var(--rojo); color: #ffe0e0;
+      box-shadow: 0 0 22px rgba(229,72,77,.5); animation: parpadeoBorde 1s steps(2) infinite; max-width: calc(100% - 20px);
+    }
+    @keyframes parpadeoBorde { 50% { border-color: #5a1515; box-shadow: 0 0 6px rgba(229,72,77,.2); } }
+    .aviso-centro {
+      position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%) scale(.9); z-index: 6; opacity: 0;
+      padding: 14px 24px; border-radius: 10px; font-weight: 700; font-size: 30px; text-align: center; max-width: 80%;
+      background: rgba(8,12,10,.9); border: 3px solid currentColor; pointer-events: none; transition: opacity .25s, transform .25s;
+      text-shadow: 0 0 14px currentColor;
+    }
+    .aviso-centro.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .aviso-centro small { display: block; font-size: 14px; font-weight: 500; margin-top: 4px; text-shadow: none; color: var(--texto); }
+    .feed { position: absolute; left: 10px; top: 10px; z-index: 4; display: flex; flex-direction: column; gap: 4px; max-width: min(380px, 34%); pointer-events: none; }
+    .feed div { font-size: 12px !important; padding: 4px 8px !important; }
+    .feed div { background: rgba(8,12,10,.86); border: 2px solid #2e3f37; border-left-width: 5px; border-radius: 6px; padding: 5px 9px; font-size: 13px; animation: feedIn .3s ease-out, feedOut .6s ease-in 6s forwards; }
+    @keyframes feedIn { from { opacity: 0; transform: translateX(-10px); } }
+    @keyframes feedOut { to { opacity: 0; } }
+    /* Menú del habitante */
+    .menu-hab {
+      position: absolute; left: 0; top: 0; z-index: 7; width: 236px; padding: 9px;
+      background: rgba(12,20,16,.96); border: 2px solid var(--naranja); border-radius: 9px;
+      box-shadow: 0 10px 28px rgba(0,0,0,.6), 0 0 14px rgba(240,160,48,.25);
+      animation: menuIn .18s ease-out;
+    }
+    @keyframes menuIn { from { opacity: 0; } }
+    .menu-cab { display: flex; align-items: center; gap: 8px; padding-bottom: 7px; margin-bottom: 7px; border-bottom: 2px solid #22322b; }
+    .menu-cab .cara { width: 32px; height: 32px; border-radius: 50%; background: #2b3b34; border: 2px solid #3a4c44; display: grid; place-items: center; overflow: hidden; flex-shrink: 0; }
+    .menu-cab .cerrar { background: none; border: none; color: var(--tenue); cursor: pointer; font-size: 15px; padding: 2px 4px; }
+    .menu-cab .cerrar:hover { color: var(--texto); }
+    .menu-sub { font-size: 12px; color: var(--verde); margin: 0 0 5px; }
+    .menu-hab .opc {
+      display: flex; justify-content: space-between; width: 100%; margin-bottom: 4px; padding: 6px 9px; cursor: pointer; text-align: left;
+      background: #16231d; border: 2px solid #2a3b33; border-radius: 6px; font-size: 13px;
+    }
+    .menu-hab .opc:hover { border-color: var(--verde); }
+    .menu-hab .opc.activa { border-color: var(--verde); background: #1d3a26; color: #eaffea; box-shadow: inset 0 0 8px rgba(91,227,107,.25); }
+    .menu-resumen { font-size: 12.5px; line-height: 1.45; padding: 5px 2px 7px; }
+    .menu-acciones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding-top: 7px; border-top: 2px solid #22322b; }
+    .menu-acciones .opc { justify-content: center; margin: 0; padding: 5px 2px; font-size: 12px; }
+    .temblor { animation: temblor .45s linear; }
+    @keyframes temblor {
+      10%, 90% { transform: translate(-2px, 1px); } 20%, 80% { transform: translate(3px, -1px); }
+      30%, 50%, 70% { transform: translate(-4px, 2px); } 40%, 60% { transform: translate(4px, -2px); }
+    }
+
+    /* SVG */
+    .avatar { cursor: pointer; }
+    .avatar .anillo { fill: none; stroke: transparent; stroke-width: 3; }
+    .avatar.sel .anillo { stroke: var(--naranja); filter: drop-shadow(0 0 4px var(--naranja)); }
+    .avatar.marcado .anillo { animation: latidoAnillo 1s ease-in-out infinite; }
+    @keyframes latidoAnillo { 50% { stroke-opacity: .35; } }
+    .avatar.atenuado { opacity: .22; }
+    .avatar .tag-txt { font-family: var(--pixel); font-size: 12px; }
+    .gira { transform-box: fill-box; transform-origin: center; animation: girar 2.4s linear infinite; }
+    .gira-lento { transform-box: fill-box; transform-origin: center; animation: girar 16s linear infinite; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    .parpadea { animation: parpadea 1.2s steps(2) infinite; }
+    .parpadea-lento { animation: parpadea 2.8s ease-in-out infinite; }
+    @keyframes parpadea { 50% { opacity: .2; } }
+    .lampara { animation: lampara 6s ease-in-out infinite; }
+    @keyframes lampara { 0%, 100% { opacity: .9; } 47% { opacity: .9; } 48% { opacity: .45; } 50% { opacity: 1; } }
+    .planta { transform-box: fill-box; transform-origin: bottom center; animation: mecer 3.5s ease-in-out infinite; }
+    @keyframes mecer { 50% { transform: rotate(3deg); } }
+    .agua { animation: ola 2.5s ease-in-out infinite; transform-box: fill-box; }
+    @keyframes ola { 50% { transform: translateY(2px); } }
+    .alarma { fill: #ff2020; opacity: 0; pointer-events: none; }
+    .alarma.activa { animation: alarma 1.4s ease-in-out infinite; }
+    @keyframes alarma { 50% { opacity: .12; } }
+    .burbuja { animation: subir 1.9s ease-out forwards; transform-box: fill-box; }
+    @keyframes subir { 0% { transform: translateY(6px); opacity: 0; } 12% { opacity: 1; transform: translateY(0); } 75% { opacity: 1; } 100% { transform: translateY(-26px); opacity: 0; } }
+    .desvanece { animation: desvanecer 1.6s ease-out forwards; }
+    @keyframes desvanecer { to { opacity: 0; } }
+    .radar { animation: radar 1s ease-out forwards; transform-box: fill-box; transform-origin: center; }
+    @keyframes radar { 0% { transform: scale(.3); opacity: 1; } 100% { transform: scale(2.4); opacity: 0; } }
+
+    /* Panel derecho */
+    .pestañas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; }
+    .pestaña { padding: 6px 2px; border-radius: 6px; border: 2px solid transparent; background: #15211c; cursor: pointer; color: var(--tenue); font-size: 12.5px; }
+    .pestaña.activa { border-color: var(--naranja); color: #ffe0a6; background: #2a2316; }
+    .bloque { background: #0f1814; border: 2px solid #22322b; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+    .bloque h3 { margin: 0 0 6px; font-size: 18px; font-weight: 500; color: var(--texto); }
+    .bloque .estado { background: #0a120f; border: 2px solid #22322b; border-radius: 6px; padding: 5px 9px; margin-bottom: 6px; }
+    .flecha-verde { color: var(--verde); }
+    .resultado { margin-top: 8px; font-size: 13px; line-height: 1.5; }
+    .resultado:empty::before { content: attr(data-vacio); color: var(--tenue); }
+    .cadena { display: flex; align-items: flex-start; justify-content: center; flex-wrap: wrap; gap: 2px; margin: 8px 0 4px; }
+    .eslabon { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 62px; cursor: pointer; }
+    .eslabon .circ { width: 50px; height: 50px; border-radius: 50%; border: 3px solid var(--verde); background: #1d2d26; display: grid; place-items: center; overflow: hidden; box-shadow: 0 0 10px rgba(91,227,107,.35); }
+    .eslabon.final .circ { border-color: var(--oro); box-shadow: 0 0 12px rgba(255,213,74,.5); }
+    .eslabon span { font-size: 13px; max-width: 62px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .flecha-cadena { color: var(--verde); font-size: 22px; margin-top: 12px; }
+    .caja-motin { border: 3px solid #3a4c44; border-radius: 8px; background: #121c18; padding: 6px; text-align: center; }
+    .caja-motin.riesgo { border-color: var(--naranja); box-shadow: 0 0 14px rgba(240,160,48,.35); }
+    .caja-motin.alto { border-color: var(--rojo); box-shadow: 0 0 14px rgba(229,72,77,.45); }
+    .caja-motin .lbl { font-size: 18px; color: #ffd27a; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; margin: 2px 3px 2px 0; border-radius: 5px; background: #16231d; border: 1px solid #2e3f37; cursor: pointer; font-size: 12.5px; }
+    .chip:hover { border-color: var(--verde); }
+    .centralidad { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font-size: 14px; margin-bottom: 6px; }
+    .centralidad div { cursor: pointer; }
+    details.plegable summary { cursor: pointer; list-style: none; }
+    details.plegable summary::-webkit-details-marker { display: none; }
+    details.plegable summary h3::before { content: "▸ "; color: var(--verde); }
+    details.plegable[open] summary h3::before { content: "▾ "; }
+    .lista-rel div { display: flex; justify-content: space-between; gap: 6px; padding: 2px 0; border-bottom: 1px dashed #22322b; font-size: 13px; }
+    .bitacora div { padding: 4px 0; border-bottom: 1px dashed #22322b; font-size: 13px; line-height: 1.4; }
+    .bitacora .t { color: var(--tenue); margin-right: 6px; }
+
+    /* Arranque */
+    #arranque { position: fixed; inset: 0; z-index: 100; background: radial-gradient(900px 500px at 50% 30%, #13221b, #030504 70%); display: flex; align-items: center; justify-content: center; padding: 16px; transition: opacity .5s; }
+    #arranque.fuera { opacity: 0; pointer-events: none; }
+    .terminal { width: min(780px, 100%); }
+    .lineas-boot { color: var(--verde); font-size: 15px; line-height: 1.7; min-height: 180px; white-space: pre-wrap; text-shadow: 0 0 6px rgba(91,227,107,.45); }
+    .lineas-boot .adv { color: var(--naranja); text-shadow: 0 0 6px rgba(240,160,48,.5); }
+    .cursor { display: inline-block; width: 9px; height: 16px; background: var(--verde); vertical-align: -2px; animation: parpadea 1s steps(2) infinite; }
+    .titulo-juego { font-size: clamp(40px, 9vw, 84px); font-weight: 700; color: #f4ecc6; margin: 14px 0 4px; text-shadow: 0 4px 0 #2a3a20, 0 0 24px rgba(91,227,107,.35); line-height: 1; }
+    .lema { font-size: 17px; line-height: 1.55; max-width: 640px; }
+    .acciones-boot { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .acciones-boot .btn { padding: 11px 16px; font-size: 15px; }
+    .aparece { animation: aparece .6s ease-out both; }
+    @keyframes aparece { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* Manual */
+    .modal-fondo { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal { width: min(860px, 100%); max-height: 88vh; overflow-y: auto; padding: 20px 24px; }
+    .modal h2 { margin: 0; font-size: 24px; font-weight: 600; }
+    .modal h3 { color: var(--naranja); font-size: 16px; margin: 16px 0 6px; font-weight: 600; }
+    .modal p, .modal li { line-height: 1.55; font-size: 14px; }
+    table.tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    table.tabla th { text-align: left; color: var(--tenue); font-weight: 500; padding: 5px; border-bottom: 2px solid #22322b; }
+    table.tabla td { padding: 5px; border-bottom: 1px dashed #22322b; vertical-align: top; }
+    code { font-family: Consolas, monospace; font-size: 12.5px; color: #bfe8c4; }
+
+    #toast { position: fixed; right: 16px; bottom: 16px; z-index: 120; padding: 10px 14px; border-radius: 8px; background: #111c18; border: 2px solid var(--marco-claro); max-width: min(440px, calc(100vw - 32px)); }
+
+    @media (max-width: 1250px) {
+      header.hud { grid-template-columns: auto auto 1fr; }
+      .hud-titulo { grid-column: 1 / -1; order: -1; }
+      .hud-controles { grid-column: 1 / -1; grid-template-columns: repeat(6, auto); justify-content: center; }
+      main.escena { grid-template-columns: 1fr; }
+      .mapa-cont { height: 72vw; order: -1; }
+      .panel-lat { max-height: 520px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================= ARRANQUE ================= -->
+<div id="arranque">
+  <div class="terminal">
+    <div id="lineas-boot" class="lineas-boot"></div>
+    <div id="portada" class="oculto">
+      <div class="titulo-juego aparece">Refugio AP-4</div>
+      <p class="lema aparece" style="animation-delay:.15s">
+        Los estudiantes del curso quedaron atrapados en un búnker. Los recursos escasean y la tensión crece.
+        No sobrevivirán por sus armas, sino por su <b style="color:var(--verde)">red de confianza</b>.
+        Si la red se rompe, el refugio colapsa.
+      </p>
+      <div class="acciones-boot aparece" style="animation-delay:.3s">
+        <button class="btn btn-verde" onclick="nuevaPartida('estudiantes')">▶ Abrir compuertas · clase de ejemplo</button>
+        <button class="btn" id="btn-boot-continuar" onclick="cerrarArranque()">Continuar con la red actual</button>
+        <button class="btn btn-azul" onclick="abrirManual()">📖 Manual del refugio</button>
+      </div>
+      <p class="nota aparece" style="margin-top:16px; animation-delay:.45s">Motor en Java · grafo dirigido con listas de adyacencia · BFS = Ruta SOS · DFS = Alerta de motín</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= HUD ================= -->
+<header class="hud">
+  <div class="marco hud-caja hud-dia">
+    <div class="icono">⛨ REFUGIO</div>
+    <div class="valor">Día <span id="hud-dia">0</span></div>
+  </div>
+  <div class="marco hud-caja">
+    <p class="titulo-marco">Recursos</p>
+    <div class="recursos">
+      <div class="recurso" title="Habitantes">👥<b id="hud-habitantes">0</b></div>
+      <div class="recurso" title="Alianzas (confianza mutua)">💚<b id="hud-alianzas">0</b></div>
+      <div class="recurso" title="Arcos de enemistad">⚔<b id="hud-enemistades">0</b></div>
+      <div class="recurso" title="Agua">💧<b id="hud-agua">OK</b></div>
+      <div class="recurso" title="Líder moral">👑<b id="hud-lider-moral">—</b></div>
+    </div>
+  </div>
+  <div class="marco hud-caja">
+    <div class="tension-titulo">Nivel de Tensión <span id="hud-tension" class="sub"></span></div>
+    <div class="segmentos" id="segmentos"></div>
+  </div>
+  <div class="marco hud-caja hud-titulo">
+    <h1>APE 4: Analizador de Relaciones – El Refugio</h1>
+    <div class="barra-titulo" title="Estabilidad del refugio"><span id="hud-estab-barra" style="width:0%"></span></div>
+  </div>
+  <div class="marco hud-controles">
+    <button class="btn btn-verde" id="btn-turno" onclick="siguienteTurno()" title="Atajo: barra espaciadora">⏭ Turno</button>
+    <button class="btn" id="btn-auto" onclick="alternarAuto()" title="Atajo: P">▶ Auto</button>
+    <select class="campo" id="sel-velocidad" onchange="cambiarVelocidad(this.value)" title="Velocidad">
+      <option value="0.6">x0.6</option><option value="1" selected>x1</option><option value="1.8">x1.8</option><option value="3">x3</option>
+    </select>
+    <button class="btn" id="btn-red" onclick="alternarRed()" title="Atajo: R">🔗 Red</button>
+    <button class="btn btn-azul" onclick="abrirManual()">📖 Manual</button>
+    <a class="btn" href="/" target="_blank" rel="noopener" style="text-decoration:none; text-align:center" title="Nexo: vista técnica del grafo">Nexo ↗</a>
+  </div>
+</header>
+
+<!-- ================= ESCENA ================= -->
+<main class="escena">
+  <!-- Lista de habitantes -->
+  <aside class="marco panel-lat">
+    <div class="panel-cab"><h2>👤 Habitantes</h2><span class="sub" id="cuenta-habitantes"></span></div>
+    <div class="desplazable" id="lista-habitantes"></div>
+    <div class="leyenda">
+      <div><i style="border-top:3px solid #5be36b"></i>⟷ Alianza (mutua)</div>
+      <div><i style="border-top:3px dashed #5be36b"></i>→ Confía (un sentido)</div>
+      <div><i style="border-top:3px solid #e5484d"></i>→ Enemistad</div>
+      <div>✓ con alianza · ⚠ paranoia alta · ✖ nadie confía</div>
+      <div>👑 líder moral · 🔗 puente</div>
+      <div style="color:var(--verde)">Clic en un habitante → ver sus relaciones</div>
+    </div>
+  </aside>
+
+  <!-- Mapa -->
+  <section class="mapa-cont" id="mapa-cont">
+    <svg id="mapa" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet" aria-label="Mapa del búnker">
+      <defs>
+        <pattern id="p-tierra" width="64" height="64" patternUnits="userSpaceOnUse">
+          <rect width="64" height="64" fill="#4a3324" />
+          <rect x="6" y="8" width="10" height="6" rx="2" fill="#5a3f2c" /><rect x="38" y="20" width="14" height="8" rx="3" fill="#3c2a1e" />
+          <rect x="20" y="40" width="8" height="5" rx="2" fill="#6a4a33" /><rect x="48" y="50" width="9" height="6" rx="2" fill="#57402e" />
+          <rect x="2" y="54" width="5" height="4" fill="#3a281c" /><rect x="30" y="4" width="4" height="3" fill="#6b5340" />
+        </pattern>
+        <pattern id="p-peligro" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="7" height="14" fill="#e6b422" /><rect x="7" width="7" height="14" fill="#1d1d1d" />
+        </pattern>
+        <pattern id="p-concreto" width="20" height="20" patternUnits="userSpaceOnUse">
+          <rect width="20" height="20" fill="#4a4f4c" /><circle cx="4" cy="6" r="1" fill="#5a605c" /><circle cx="14" cy="14" r="1.2" fill="#3c413e" />
+        </pattern>
+        <pattern id="p-azulejo" width="22" height="22" patternUnits="userSpaceOnUse">
+          <rect width="22" height="22" fill="none" stroke="#b9d6e2" stroke-opacity=".35" stroke-width="1" />
+        </pattern>
+        <pattern id="p-tablas" width="40" height="18" patternUnits="userSpaceOnUse">
+          <rect width="40" height="18" fill="none" stroke="#2e2014" stroke-opacity=".5" />
+        </pattern>
+        <linearGradient id="g-luz" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fff4c8" stop-opacity=".28" /><stop offset="1" stop-color="#fff4c8" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="g-luz-fria" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#e8fbff" stop-opacity=".32" /><stop offset="1" stop-color="#e8fbff" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="g-pozo" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#16231e" /><stop offset=".5" stop-color="#22362d" /><stop offset="1" stop-color="#16231e" />
+        </linearGradient>
+        <filter id="f-brillo" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2.5" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <marker id="m-verde" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5be36b" stroke="#0d2a12" stroke-width="1" /></marker>
+        <marker id="m-rojo" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e5484d" stroke="#2a0d0d" stroke-width="1" /></marker>
+      </defs>
+      <g id="capa-escenario"></g>
+      <g id="capa-red"></g>
+      <g id="capa-marcas"></g>
+      <g id="capa-avatares"></g>
+      <g id="capa-fx" style="pointer-events:none"></g>
+      <rect id="alarma" class="alarma" x="0" y="0" width="1000" height="700" />
+    </svg>
+    <div id="banner-crisis" class="banner-crisis oculto">
+      <span>🚨</span><span id="crisis-texto"></span>
+      <button class="btn btn-rojo btn-mini" onclick="sosDeCrisis()">📡 Ruta SOS</button>
+    </div>
+    <div id="aviso-centro" class="aviso-centro"></div>
+    <div id="menu-hab" class="menu-hab oculto" onclick="event.stopPropagation()"></div>
+    <div id="feed" class="feed"></div>
+  </section>
+
+  <!-- Análisis de red -->
+  <aside class="marco panel-lat">
+    <div class="panel-cab" style="flex-direction:column; align-items:center">
+      <h2 style="font-size:22px">Análisis de Red</h2>
+      <span class="sub">(Graph Analysis)</span>
+    </div>
+    <div class="pestañas">
+      <button class="pestaña activa" data-tab="analisis" onclick="cambiarPestaña('analisis')">📊 Red</button>
+      <button class="pestaña" data-tab="habitante" onclick="cambiarPestaña('habitante')">👤 Ficha</button>
+      <button class="pestaña" data-tab="gestion" onclick="cambiarPestaña('gestion')">⚙ Gestión</button>
+      <button class="pestaña" data-tab="bitacora" onclick="cambiarPestaña('bitacora')">📜 Bitácora</button>
+    </div>
+
+    <div class="desplazable">
+      <!-- ===== ANÁLISIS ===== -->
+      <div id="tab-analisis">
+        <div class="bloque">
+          <h3>Algoritmo BFS · Ruta SOS</h3>
+          <div class="estado" id="sos-estado">Buscando: —</div>
+          <div class="grid2">
+            <div><label class="etq">Pide ayuda</label><select id="sos-origen" class="campo"></select></div>
+            <div><label class="etq">Necesita un</label><select id="sos-rol" class="campo"></select></div>
+          </div>
+          <button class="btn btn-azul ancho" style="margin-top:8px" onclick="lanzarSOS()">📡 Lanzar Ruta SOS</button>
+          <div id="res-sos" class="resultado" data-vacio="El BFS revisa nivel por nivel: primero a quienes confía directamente, luego a los conocidos de ellos. El primero con el rol buscado es el más cercano."></div>
+        </div>
+
+        <div class="bloque">
+          <h3>Comunidades (DFS) · Motín</h3>
+          <div class="estado"><span class="flecha-verde">→</span> DFS desde la líder + Kosaraju</div>
+          <button class="btn btn-naranja ancho" onclick="escanearMotin()">🔦 Escanear refugio</button>
+          <div id="res-motin" class="resultado" data-vacio="Busca grupos donde todos se alcanzan entre sí (componentes fuertemente conexas) sin ninguna cadena de confianza hacia la líder."></div>
+        </div>
+
+        <div class="bloque">
+          <h3>Análisis de Influencia</h3>
+          <div id="centralidad" class="centralidad"></div>
+          <div id="mini-red"></div>
+          <div class="nota" style="margin:4px 0 0">Centralidad = en cuántos confían (grado de entrada). 🔗 Puente = mayor intermediación.</div>
+        </div>
+
+        <details class="bloque plegable">
+          <summary><h3>Facciones · cohesión</h3></summary>
+          <p class="nota">Triángulos de confianza mutua. Cohesión = densidad = conexiones / (n·(n−1)/2).</p>
+          <button class="btn btn-verde ancho" onclick="detectarFacciones()">⚑ Detectar facciones</button>
+          <div id="res-facciones" class="resultado"></div>
+        </details>
+
+        <details class="bloque plegable">
+          <summary><h3>Mediación · amigos en común</h3></summary>
+          <p class="nota">Quienes pueden calmar un conflicto: las personas en las que ambos confían.</p>
+          <div class="grid2"><select id="med-a" class="campo"></select><select id="med-b" class="campo"></select></div>
+          <button class="btn ancho" style="margin-top:8px" onclick="buscarMediadores()">🕊 Buscar mediadores</button>
+          <div id="res-mediacion" class="resultado"></div>
+        </details>
+      </div>
+
+      <!-- ===== FICHA ===== -->
+      <div id="tab-habitante" class="oculto"><div class="bloque" id="ficha"></div></div>
+
+      <!-- ===== GESTIÓN ===== -->
+      <div id="tab-gestion" class="oculto">
+        <div class="bloque">
+          <h3>Partida</h3>
+          <p class="nota">La misma semilla repite la misma partida (útil para presentar).</p>
+          <div class="grid2">
+            <div><label class="etq">Escenario</label>
+              <select id="sel-escenario" class="campo">
+                <option value="estudiantes">Clase completa (15)</option>
+                <option value="comunidades">Comunidades</option>
+                <option value="red-social">Red pequeña</option>
+                <option value="">Mantener red actual</option>
+              </select></div>
+            <div><label class="etq">Semilla</label><input id="inp-semilla" class="campo" type="number" value="2026" /></div>
+          </div>
+          <button class="btn btn-verde ancho" style="margin-top:8px" onclick="nuevaPartida($('sel-escenario').value, Number($('inp-semilla').value))">▶ Nueva partida</button>
+        </div>
+        <div class="bloque">
+          <h3>Nuevo habitante</h3>
+          <p class="nota">Cada habitante es un <b>vértice</b>: un estudiante con sus datos.</p>
+          <form onsubmit="agregarHabitante(event)">
+            <input id="nuevo-nombre" class="campo" placeholder="Nombre" maxlength="30" required />
+            <div class="grid2" style="margin-top:6px">
+              <input id="nuevo-carrera" class="campo" placeholder="Carrera" maxlength="40" />
+              <input id="nuevo-semestre" class="campo" type="number" min="1" max="12" placeholder="Semestre" />
+            </div>
+            <button class="btn btn-verde ancho" style="margin-top:8px" type="submit">Admitir en el refugio</button>
+          </form>
+          <div class="fila" style="margin-top:10px">
+            <select id="sel-expulsar" class="campo"></select>
+            <button class="btn btn-rojo" onclick="expulsarHabitante()">Expulsar</button>
+          </div>
+        </div>
+        <div class="bloque">
+          <h3>Relación manual</h3>
+          <p class="nota">Cada sentido es un <b>arco</b> distinto: que A confíe en B no obliga a B a confiar en A.</p>
+          <div class="grid2">
+            <div><label class="etq">Desde</label><select id="rel-origen" class="campo"></select></div>
+            <div><label class="etq">Hacia</label><select id="rel-destino" class="campo"></select></div>
+          </div>
+          <label class="etq" style="margin-top:6px">Tipo de arco</label>
+          <select id="rel-tipo" class="campo">
+            <option value="AMISTAD">Confía (Amistad)</option><option value="ENEMISTAD">Enemistad</option><option value="DESCONOCIDO">Desconocido</option>
+          </select>
+          <div class="grid2" style="margin-top:8px">
+            <button class="btn btn-verde" onclick="aplicarRelacion()">Aplicar</button>
+            <button class="btn btn-rojo" onclick="romperRelacion()">Borrar el par</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== BITÁCORA ===== -->
+      <div id="tab-bitacora" class="oculto">
+        <div class="bloque">
+          <div class="fila" style="justify-content:space-between"><h3>Bitácora</h3><button class="btn btn-mini" onclick="limpiarMarcas()">Limpiar marcas</button></div>
+          <div id="bitacora" class="bitacora"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<!-- ================= MANUAL ================= -->
+<div id="modal-manual" class="modal-fondo oculto" onclick="if (event.target === this) cerrarManual()">
+  <div class="marco modal">
+    <div class="fila" style="justify-content:space-between"><h2>📖 Manual del refugio</h2><button class="btn btn-mini" onclick="cerrarManual()">✕ Cerrar</button></div>
+    <p class="nota">Cómo el juego representa la teoría de grafos de la APE 4.</p>
+    <h3>El grafo</h3>
+    <table class="tabla">
+      <tr><th>En el juego</th><th>En el grafo</th></tr>
+      <tr><td>Habitante (un estudiante del curso)</td><td><b>Vértice</b> (<code>Usuario</code>) con nombre y perfil. Guarda listas de arcos <b>salientes y entrantes</b> (referencias, sin duplicar). Rol, paranoia y sala van en una ficha aparte (<code>FichaSobreviviente</code>).</td></tr>
+      <tr><td>A confía en B</td><td><b>Arco dirigido</b> A → B de tipo Amistad, con peso = afinidad (1 a 10).</td></tr>
+      <tr><td>Alianza ⟷</td><td>Dos arcos opuestos de Amistad (confianza mutua).</td></tr>
+      <tr><td>Enemistad</td><td>Arco de tipo Enemistad. No se sigue en los recorridos.</td></tr>
+    </table>
+    <h3>Algoritmos</h3>
+    <table class="tabla">
+      <tr><td><b>Ruta SOS</b></td><td><b>BFS</b> con cola desde quien pide ayuda; se detiene en el primer habitante con el rol buscado (camino con menos saltos).</td></tr>
+      <tr><td><b>Alerta de motín</b></td><td><b>DFS</b> con pila desde la líder + <b>Kosaraju</b> (dos DFS; el segundo sigue los arcos entrantes) para hallar componentes fuertemente conexas. Un grupo de 3 o más sin cadena hacia la líder = riesgo ALTO.</td></tr>
+      <tr><td><b>Facciones</b></td><td>Comunidades por triángulos de confianza mutua. Cohesión = densidad = conexiones / (n·(n−1)/2).</td></tr>
+      <tr><td><b>Mediación</b></td><td>Amigos en común: intersección de las listas de adyacencia de dos habitantes.</td></tr>
+      <tr><td><b>Reclutamiento</b></td><td>Sugerir amigos: amigos de mis amigos con los que aún no tengo opinión.</td></tr>
+      <tr><td><b>Influencia</b></td><td>Centralidad de grado (arcos entrantes) e intermediación (algoritmo de Brandes).</td></tr>
+    </table>
+    <h3>Reglas de cada turno</h3>
+    <ul>
+      <li><b>Movimiento:</b> 45% a su sala de trabajo, 15% comedor, 15% dormitorios, 12% invernadero, 13% al azar.</li>
+      <li><b>Confianza:</b> quienes coinciden pueden empezar a confiar (comedor 40%, dormitorios 15%, otras 25%; +15% con amigos en común).</li>
+      <li><b>Alianza:</b> si alguien ya confía en ti y tu paranoia es menor a 60, puedes corresponder.</li>
+      <li><b>Sospecha:</b> con paranoia mayor a 55 puedes desconfiar de quien te cruzas.</li>
+      <li><b>Traición:</b> con paranoia mayor a 80, en el filtro de agua rompes tu confianza más débil.</li>
+      <li><b>Conflicto y mediación:</b> enemigos que se cruzan pelean (+12 paranoia) o un amigo en común media.</li>
+      <li><b>Calma:</b> médico en la enfermería −12 · dormir −6 · invernadero −4 · cada persona que confía en ti −2.</li>
+      <li><b>Tensión:</b> +6 racionamiento por turno, +10 si nadie confía en ti, +3 mientras haya una crisis.</li>
+      <li><b>Crisis:</b> emergencias al azar que se resuelven con la Ruta SOS hasta el rol necesario.</li>
+    </ul>
+    <h3>Atajos</h3>
+    <p>Espacio: turno · P: auto/pausa · R: red · Esc: cerrar · <code>/refugio#demo</code>: carga la clase de ejemplo.</p>
+  </div>
+</div>
+
+<div id="toast" class="oculto"></div>
+
+<script>
+'use strict';
+
+// ================= Datos fijos =================
+const NS = 'http://www.w3.org/2000/svg';
+const PISO_Y0 = 116, PISO_H = 168, PISO_GAP = 20;
+const EJE_X = 500;
+const VEL_CAMINAR = 150;
+const SALAS = {
+  ENTRADA:     { piso: 1, lado: 0, titulo: 'Entrada / Muro', sub: '(Defensas)' },
+  ENFERMERIA:  { piso: 1, lado: 1, titulo: 'Enfermería' },
+  INVERNADERO: { piso: 2, lado: 0, titulo: 'Invernadero' },
+  COMEDOR:     { piso: 2, lado: 1, titulo: 'Comedor' },
+  FILTRO_AGUA: { piso: 3, lado: 0, titulo: 'Filtro de Agua' },
+  DORMITORIOS: { piso: 3, lado: 1, titulo: 'Dormitorios' }
+};
+const ROL_INFO = {
+  LIDER:     { etiqueta: 'Líder',     icono: '★', color: '#ffd54a' },
+  MEDICO:    { etiqueta: 'Médico',    icono: '✚', color: '#ff7b7b' },
+  INGENIERO: { etiqueta: 'Ingeniero', icono: '⚙', color: '#ffb057' },
+  GUARDIA:   { etiqueta: 'Guardia',   icono: '⛨', color: '#a8d05a' },
+  COCINERO:  { etiqueta: 'Cocinero',  icono: '♨', color: '#7cd0f2' }
+};
+const ESTILO_EVENTO = {
+  CONFIANZA: { color: '#5be36b', icono: '🤝' }, ALIANZA: { color: '#5be36b', icono: '💚' },
+  FORTALECE: { color: '#8ef09a', icono: '⬆' }, SOSPECHA: { color: '#f0a030', icono: '👁' },
+  TRAICION:  { color: '#e5484d', icono: '🗡' }, CONFLICTO: { color: '#ff7a45', icono: '⚡' },
+  MEDIACION: { color: '#59c2e6', icono: '🕊' }, CALMA: { color: '#59c2e6', icono: '✚' },
+  ALERTA:    { color: '#f0a030', icono: '❗' }, CRISIS: { color: '#e5484d', icono: '🚨' },
+  RESUELTA:  { color: '#5be36b', icono: '✔' }, MANDO: { color: '#ffd54a', icono: '★' },
+  SOS:       { color: '#59c2e6', icono: '📡' }, SISTEMA: { color: '#95a99d', icono: '›' }
+};
+const COLORES_GRUPO = ['#f0a030', '#59c2e6', '#5be36b', '#ff6bcb', '#b388ff', '#ffd54a'];
+
+// ================= Sprites (pixel art 12x18) =================
+const SPRITE_BASE = [
+  '...oooooo...',
+  '..ohhhhhho..',
+  '.ohhhhhhhho.',
+  '.ohssssssho.',
+  '.osesssseso.',
+  '.osssssssso.',
+  '..ossmmsso..',
+  '...oossoo...',
+  '..occcccco..',
+  '.occcddccco.',
+  'occccddcccco',
+  'o' + 'c'.repeat(10) + 'o',
+  'osoccccccoso',
+  '..oppppppo..',
+  '..oppooppo..',
+  '..oppooppo..',
+  '..obboobbo..',
+  '..ooo..ooo..'
+];
+const PIERNAS_PASO = { 14: '.oppo..oppo.', 15: '.oppo..oppo.', 16: '.obbo..obbo.', 17: '.ooo....ooo.' };
+const SPRITE_ROL = {
+  LIDER:     { filas: { 8: '..oaccccao..' }, c: '#34446a', d: '#b33a3a', a: '#e6b422', p: '#262f45' },
+  MEDICO:    { filas: { 9: '.occcccdcco.', 10: 'occcccdddcco', 11: 'occccccdccco' }, c: '#eef2f3', d: '#d63031', p: '#6f9fc4' },
+  INGENIERO: { filas: { 0: '...yyyyyy...', 1: '..yyyyyyyy..', 2: '.yyyyyyyyyy.', 9: '.odccccccdo.', 10: 'ocdccccccdco', 13: '..oddddddo..' }, c: '#e67e22', d: '#5d4037', y: '#f1c40f', p: '#34495e' },
+  GUARDIA:   { filas: { 0: '...gggggg...', 1: '..gggggggg..', 2: '.gggggggggg.', 9: '.occdccdcco.', 10: 'occddccddcco', 11: 'occddccddcco' }, c: '#5d6b3a', d: '#2f3820', g: '#46552c', p: '#3a432a' },
+  COCINERO:  { filas: { 0: '...wwwwww...', 1: '..wwwwwwww..', 9: '.occddddcco.', 10: 'occcddddccco', 11: 'occcddddccco', 12: 'osocddddcoso' }, c: '#4fa3d9', d: '#f5f5f5', w: '#ffffff', p: '#2f3640' }
+};
+const PIELES = ['#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#ffdbac', '#d4a373'];
+const PELOS = ['#2b1d0e', '#4a2f1b', '#6b4226', '#c9a227', '#141414', '#8e3b2f', '#5a5a5a'];
+const CORONA = ['a..a..a', 'aa.a.aa', 'aaaaaaa', 'aaaaaaa'];
+const ESCALA = 2.6;
+
+// ================= Estado =================
+let grafo = { usuarios: [], relaciones: [] };
+let juego = null;
+let arcos = new Map();
+const ents = new Map();
+let seleccionado = null;
+let verRed = false;            // todas las flechas (botón "Red"); por defecto ocultas
+let modoRelacion = null;       // relaciones del seleccionado: 'salientes' | 'entrantes' | 'todas'
+let enfoqueRel = null;         // habitantes que se ven nítidos mientras se miran unas relaciones
+let auto = false;
+let velocidad = 1;
+let ocupado = false;
+let marcas = new Map();
+let lineasMarca = [];
+let atenuados = null;
+let lineasRed = [];
+let comunidadesCache = [];
+let ultimoTick = performance.now();
+
+const $ = (id) => document.getElementById(id);
+const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+const espera = (ms) => esperar(ms / velocidad);
+
+function svg(etiqueta, atributos = {}) {
+  const el = document.createElementNS(NS, etiqueta);
+  for (const [k, v] of Object.entries(atributos)) el.setAttribute(k, v);
+  return el;
+}
+function esc(texto) {
+  return String(texto).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function usuario(id) { return grafo.usuarios.find((u) => u.id === id); }
+function nombre(id) { const u = usuario(id); return u ? u.nombre : '#' + id; }
+function ficha(id) { return juego ? juego.sobrevivientes.find((s) => s.id === id) : null; }
+function colorParanoia(p) { return p > 80 ? '#e5484d' : p > 55 ? '#f0a030' : '#5be36b'; }
+function hash(n) { let x = (n * 2654435761) >>> 0; x ^= x >>> 13; return x >>> 0; }
+
+async function api(metodo, ruta, cuerpo) {
+  const opciones = { method: metodo };
+  if (cuerpo !== undefined) {
+    opciones.body = typeof cuerpo === 'string' ? cuerpo : JSON.stringify(cuerpo);
+    opciones.headers = { 'Content-Type': 'application/json' };
+  }
+  const res = await fetch(ruta, opciones);
+  const datos = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(datos.error || 'Error ' + res.status);
+  return datos;
+}
+function aviso(texto, error = false) {
+  const t = $('toast');
+  t.textContent = texto;
+  t.style.borderColor = error ? 'var(--rojo)' : 'var(--verde-osc)';
+  t.classList.remove('oculto');
+  clearTimeout(aviso._t);
+  aviso._t = setTimeout(() => t.classList.add('oculto'), 3800);
+}
+async function accion(fn) {
+  try { await fn(); } catch (e) { aviso(e.message, true); }
+}
+
+// ================= Geometría =================
+function rectSala(sala) {
+  const d = SALAS[sala];
+  const y = PISO_Y0 + (d.piso - 1) * (PISO_H + PISO_GAP);
+  return { x: d.lado === 0 ? 80 : 530, y, w: 390, h: PISO_H };
+}
+function sueloY(sala) { const r = rectSala(sala); return r.y + r.h - 14; }
+
+function puestos() {
+  const porSala = {};
+  for (const s of juego.sobrevivientes) (porSala[s.sala] ||= []).push(s.id);
+  const res = new Map();
+  for (const [sala, ids] of Object.entries(porSala)) {
+    ids.sort((a, b) => a - b);
+    const r = rectSala(sala);
+    const util = r.w - 70;
+    ids.forEach((id, i) => {
+      const x = r.x + 35 + (i + 0.5) * (util / ids.length) + ((hash(id) % 7) - 3);
+      res.set(id, { x, y: sueloY(sala) });
+    });
+  }
+  return res;
+}
+
+// ================= Escenario =================
+function dibujarEscenario() {
+  let s = '';
+  // Cielo, pasto y tierra
+  s += `<rect x="0" y="0" width="1000" height="40" fill="#1d2a2c"/>`;
+  s += `<rect x="0" y="40" width="1000" height="660" fill="url(#p-tierra)"/>`;
+  s += `<rect x="0" y="34" width="1000" height="10" fill="#4f7d2c"/>`;
+  for (let x = 0; x < 1000; x += 7) s += `<rect x="${x}" y="${30 + (hash(x) % 5)}" width="3" height="${6 + (hash(x + 1) % 5)}" fill="${x % 3 ? '#6aa33a' : '#3f6a22'}"/>`;
+  s += `<rect x="0" y="44" width="1000" height="6" fill="#2e2016" opacity=".6"/>`;
+  for (let i = 0; i < 26; i++) {
+    const x = hash(i * 31) % 1000, y = 60 + hash(i * 17) % 630;
+    s += `<rect x="${x}" y="${y}" width="${8 + hash(i) % 14}" height="${6 + hash(i * 3) % 8}" rx="3" fill="${i % 2 ? '#5d5650' : '#3d3632'}" opacity=".8"/>`;
+  }
+  s += `<text x="16" y="24" fill="#f0a030" font-size="13" class="parpadea-lento" font-family="Pixelify Sans, sans-serif">☢ Superficie · zona contaminada</text>`;
+  // Escotilla y túnel hasta el búnker
+  s += `<rect x="478" y="40" width="44" height="58" fill="#1a1410"/><rect x="470" y="30" width="60" height="10" rx="3" fill="#5a5f5c" stroke="#2b2f2d" stroke-width="2"/>`;
+  // Túnel inferior decorativo
+  s += `<path d="M480 680 L520 680 L530 700 L470 700 Z" fill="#2a1d14"/>`;
+  // Cascarón del búnker
+  s += `<rect x="58" y="94" width="884" height="588" rx="30" fill="#2b2e2c" stroke="#1b1d1c" stroke-width="6"/>`;
+  s += `<rect x="66" y="102" width="868" height="572" rx="24" fill="url(#p-concreto)" stroke="#5c625e" stroke-width="2"/>`;
+  s += `<rect x="78" y="114" width="844" height="548" rx="10" fill="#1a1d1c"/>`;
+  // Pozo con escalera y luces verdes
+  s += `<rect x="470" y="96" width="60" height="566" fill="url(#g-pozo)"/>`;
+  s += `<line x1="485" y1="96" x2="485" y2="662" stroke="#3c544a" stroke-width="3"/><line x1="515" y1="96" x2="515" y2="662" stroke="#3c544a" stroke-width="3"/>`;
+  for (let y = 104; y < 662; y += 13) s += `<line x1="485" y1="${y}" x2="515" y2="${y}" stroke="#2f4239" stroke-width="2"/>`;
+  for (let p = 1; p <= 3; p++) {
+    const y = PISO_Y0 + (p - 1) * (PISO_H + PISO_GAP);
+    s += `<rect x="484" y="${y + 6}" width="32" height="5" rx="2" fill="#bfffd0"/><path d="M484 ${y + 11} L516 ${y + 11} L540 ${y + 70} L460 ${y + 70} Z" fill="#5be36b" opacity=".12"/>`;
+    s += `<rect x="470" y="${y + PISO_H - 4}" width="60" height="6" fill="#2f3a35"/>`;
+  }
+  // Losas entre pisos
+  for (let p = 1; p < 3; p++) {
+    const y = PISO_Y0 + p * (PISO_H + PISO_GAP) - PISO_GAP;
+    s += `<rect x="78" y="${y}" width="392" height="${PISO_GAP}" fill="url(#p-concreto)"/><rect x="530" y="${y}" width="392" height="${PISO_GAP}" fill="url(#p-concreto)"/>`;
+    s += `<rect x="78" y="${y}" width="392" height="3" fill="#6a706c"/><rect x="530" y="${y}" width="392" height="3" fill="#6a706c"/>`;
+  }
+  for (const sala of Object.keys(SALAS)) s += dibujarSala(sala);
+  $('capa-escenario').innerHTML = s;
+}
+
+const TEMAS = {
+  ENTRADA:     { pared: ['#6b5038', '#4a3626'], piso: '#3b2a1e', luz: 'g-luz', patron: 'p-tablas' },
+  ENFERMERIA:  { pared: ['#a9cbd8', '#7fa6b8'], piso: '#5d7f8f', luz: 'g-luz-fria', patron: 'p-azulejo' },
+  INVERNADERO: { pared: ['#1f93b6', '#0d5068'], piso: '#1b3f4a', luz: 'g-luz-fria', patron: '' },
+  COMEDOR:     { pared: ['#8e5d3b', '#6a4128'], piso: '#4a2f1d', luz: 'g-luz', patron: 'p-tablas' },
+  FILTRO_AGUA: { pared: ['#557089', '#344a5e'], piso: '#273746', luz: 'g-luz-fria', patron: 'p-azulejo' },
+  DORMITORIOS: { pared: ['#76614e', '#544435'], piso: '#3a2f25', luz: 'g-luz', patron: 'p-tablas' }
+};
+
+function dibujarSala(sala) {
+  const { x, y, w, h } = rectSala(sala);
+  const t = TEMAS[sala];
+  const piso = y + h - 14;
+  let s = `<defs><clipPath id="recorte-${sala}"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath>`;
+  s += `<linearGradient id="g-${sala}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${t.pared[0]}"/><stop offset="1" stop-color="${t.pared[1]}"/></linearGradient></defs>`;
+  s += `<g clip-path="url(#recorte-${sala})">`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#g-${sala})"/>`;
+  if (t.patron) s += `<rect x="${x}" y="${y}" width="${w}" height="${h - 14}" fill="url(#${t.patron})"/>`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="8" fill="#000" opacity=".25"/>`;
+  s += propsSala(sala, x, y, w, h);
+  s += `<rect x="${x}" y="${piso}" width="${w}" height="14" fill="${t.piso}"/><rect x="${x}" y="${piso}" width="${w}" height="3" fill="#000" opacity=".25"/>`;
+  s += `<path d="M${x + w / 2 - 30},${y + 10} L${x + w / 2 + 30},${y + 10} L${x + w / 2 + 170},${piso} L${x + w / 2 - 170},${piso} Z" fill="url(#${t.luz})" class="lampara"/>`;
+  s += `<rect x="${x + w / 2 - 34}" y="${y + 5}" width="68" height="6" rx="2" fill="${t.luz === 'g-luz' ? '#ffe9a8' : '#e8fbff'}"/>`;
+  s += `<rect id="alerta-${sala}" x="${x}" y="${y}" width="${w}" height="${h}" fill="#e5484d" opacity="0"/>`;
+  s += `</g>`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#0e1110" stroke-width="3"/>`;
+  // Cartel con el nombre
+  const titulo = SALAS[sala].titulo, sub = SALAS[sala].sub;
+  const ancho = Math.max(titulo.length * 11 + 22, sub ? sub.length * 8 + 22 : 0);
+  s += `<rect x="${x + 8}" y="${y + 12}" width="${ancho}" height="${sub ? 42 : 28}" rx="4" fill="#0c1612" fill-opacity=".82" stroke="#2f4a3c" stroke-width="2"/>`;
+  s += `<text x="${x + 18}" y="${y + 32}" fill="#d9f7d2" font-size="19" font-family="Pixelify Sans, sans-serif">${titulo}</text>`;
+  if (sub) s += `<text x="${x + 18}" y="${y + 48}" fill="#b8c9b6" font-size="13" font-family="Pixelify Sans, sans-serif">${sub}</text>`;
+  s += `<text id="cuenta-${sala}" x="${x + w - 10}" y="${y + 28}" text-anchor="end" fill="#e8f5e0" font-size="13" font-family="Pixelify Sans, sans-serif" stroke="#0c1612" stroke-width="3" paint-order="stroke"></text>`;
+  return s;
+}
+
+function planta(px, py, escala) {
+  const k = escala;
+  return `<g class="planta" style="animation-delay:${(hash(px) % 30) / 10}s">
+    <rect x="${px - 1}" y="${py - 22 * k}" width="2" height="${22 * k}" fill="#2a8a3a"/>
+    <path d="M${px} ${py - 8 * k} q${-10 * k} ${-2 * k} ${-12 * k} ${-10 * k} q${8 * k} 0 ${12 * k} ${8 * k}z" fill="#5ef06a"/>
+    <path d="M${px} ${py - 13 * k} q${10 * k} ${-2 * k} ${12 * k} ${-10 * k} q${-8 * k} 0 ${-12 * k} ${8 * k}z" fill="#3fd256"/>
+    <path d="M${px} ${py - 20 * k} q${-7 * k} ${-3 * k} ${-6 * k} ${-9 * k} q${6 * k} ${2 * k} ${6 * k} ${8 * k}z" fill="#8cff95"/>
+  </g>`;
+}
+
+function propsSala(sala, x, y, w, h) {
+  const piso = y + h - 14;
+  let s = '';
+  switch (sala) {
+    case 'ENTRADA':
+      s += `<rect x="${x}" y="${y + 14}" width="${w}" height="9" fill="#5a5f5c"/><rect x="${x}" y="${y + 26}" width="${w * 0.7}" height="6" fill="#4a4f4c"/>`;
+      s += `<rect x="${x + 4}" y="${y + 40}" width="16" height="${piso - y - 40}" fill="url(#p-peligro)"/>`;
+      s += `<circle cx="${x + 330}" cy="${y + 92}" r="46" fill="#4d4f4b" stroke="#2c2e2b" stroke-width="7"/>`;
+      s += `<circle cx="${x + 330}" cy="${y + 92}" r="30" fill="#5f625d" stroke="#3a3c39" stroke-width="3"/>`;
+      s += `<g class="gira-lento"><rect x="${x + 327}" y="${y + 64}" width="6" height="56" fill="#8a8d88"/><rect x="${x + 302}" y="${y + 89}" width="56" height="6" fill="#8a8d88"/></g>`;
+      s += `<rect x="${x + 150}" y="${y + 60}" width="60" height="40" rx="2" fill="#2a2a24" stroke="#6b6553" stroke-width="2"/><rect x="${x + 156}" y="${y + 66}" width="48" height="6" fill="#5be36b" class="parpadea-lento"/>`;
+      for (let i = 0; i < 4; i++) s += `<rect x="${x + 30 + i * 22}" y="${piso - 16}" width="24" height="16" rx="6" fill="#8a7a55" stroke="#5a4e36"/>`;
+      s += `<rect x="${x + 44}" y="${piso - 30}" width="24" height="15" rx="6" fill="#968660" stroke="#5a4e36"/>`;
+      s += `<rect x="${x + 250}" y="${piso - 30}" width="34" height="30" fill="#6b5232" stroke="#3c2c1a" stroke-width="2"/><line x1="${x + 250}" y1="${piso - 30}" x2="${x + 284}" y2="${piso}" stroke="#3c2c1a" stroke-width="2"/>`;
+      break;
+    case 'ENFERMERIA':
+      s += `<rect x="${x + 220}" y="${y + 36}" width="54" height="40" rx="3" fill="#f4f6f7" stroke="#8aa2ad" stroke-width="2"/><rect x="${x + 242}" y="${y + 42}" width="10" height="28" fill="#e03131"/><rect x="${x + 233}" y="${y + 51}" width="28" height="10" fill="#e03131"/>`;
+      s += `<rect x="${x + 300}" y="${y + 38}" width="76" height="${piso - y - 38}" fill="#e8eef0" stroke="#7d97a2" stroke-width="2"/>`;
+      for (let i = 0; i < 3; i++) s += `<line x1="${x + 300}" y1="${y + 64 + i * 26}" x2="${x + 376}" y2="${y + 64 + i * 26}" stroke="#7d97a2"/>`;
+      for (let i = 0; i < 5; i++) s += `<rect x="${x + 308 + i * 13}" y="${y + 46}" width="7" height="16" rx="2" fill="${i % 2 ? '#7fc4e8' : '#a7d9a0'}"/>`;
+      s += `<rect x="${x + 150}" y="${y + 60}" width="50" height="62" fill="#cfe3ea" stroke="#7d97a2" stroke-width="2"/><rect x="${x + 156}" y="${y + 66}" width="38" height="22" fill="#9fe3f2" opacity=".7"/>`;
+      s += `<rect x="${x + 60}" y="${piso - 26}" width="130" height="12" fill="#ffffff"/><rect x="${x + 60}" y="${piso - 32}" width="28" height="9" rx="3" fill="#dfe9ee"/><rect x="${x + 64}" y="${piso - 14}" width="5" height="14" fill="#6b7f88"/><rect x="${x + 182}" y="${piso - 14}" width="5" height="14" fill="#6b7f88"/>`;
+      s += `<line x1="${x + 210}" y1="${y + 60}" x2="${x + 210}" y2="${piso}" stroke="#6b7f88" stroke-width="2"/><rect x="${x + 202}" y="${y + 60}" width="16" height="22" rx="3" fill="#9fd3ff" opacity=".85"/>`;
+      break;
+    case 'INVERNADERO':
+      for (let i = 1; i < 8; i++) s += `<line x1="${x + i * w / 8}" y1="${y}" x2="${x + i * w / 8}" y2="${piso}" stroke="#9fe8f7" stroke-opacity=".25" stroke-width="2"/>`;
+      s += `<rect x="${x}" y="${y + 70}" width="${w}" height="2" fill="#9fe8f7" opacity=".2"/>`;
+      s += `<rect x="${x + 60}" y="${y + 18}" width="${w - 120}" height="7" rx="2" fill="#e9ffd9" filter="url(#f-brillo)"/>`;
+      s += `<path d="M${x + 60} ${y + 25} L${x + w - 60} ${y + 25} L${x + w} ${piso} L${x} ${piso} Z" fill="#7dff8a" opacity=".1"/>`;
+      for (const [bx, bw] of [[x + 16, 170], [x + 204, 170]]) {
+        s += `<rect x="${bx}" y="${piso - 34}" width="${bw}" height="24" rx="3" fill="#5c5674" stroke="#3a3550" stroke-width="2"/>`;
+        s += `<rect x="${bx + 4}" y="${piso - 12}" width="6" height="12" fill="#3a3550"/><rect x="${bx + bw - 10}" y="${piso - 12}" width="6" height="12" fill="#3a3550"/>`;
+        s += `<rect x="${bx + 2}" y="${piso - 30}" width="${bw - 4}" height="6" fill="#c86bd8" opacity=".45"/>`;
+        for (let p = 0; p < 5; p++) s += planta(bx + 18 + p * (bw - 30) / 4, piso - 34, 1 + (hash(bx + p) % 3) * 0.12);
+      }
+      s += `<rect x="${x + 330}" y="${y + 40}" width="44" height="26" rx="3" fill="#1b2b30" stroke="#7fdcf0"/><rect x="${x + 335}" y="${y + 45}" width="12" height="16" fill="#e5484d" class="parpadea-lento"/><rect x="${x + 352}" y="${y + 45}" width="17" height="16" fill="#5be36b" opacity=".7"/>`;
+      break;
+    case 'COMEDOR':
+      s += `<rect x="${x + 100}" y="${y + 42}" width="270" height="56" rx="3" fill="#9aa7ad" stroke="#5f6a70" stroke-width="2"/>`;
+      s += `<rect x="${x + 112}" y="${y + 50}" width="160" height="30" fill="#c9dbe2" opacity=".7"/><rect x="${x + 284}" y="${y + 50}" width="74" height="40" fill="#6f7c82"/>`;
+      s += `<circle cx="${x + 300}" cy="${y + 62}" r="5" fill="#2b2f31"/><circle cx="${x + 320}" cy="${y + 62}" r="5" fill="#2b2f31"/><circle cx="${x + 340}" cy="${y + 62}" r="5" fill="#2b2f31"/>`;
+      s += `<rect x="${x + 30}" y="${y + 52}" width="44" height="36" fill="#2b1d12" stroke="#a37a4c" stroke-width="2"/><text x="${x + 52}" y="${y + 74}" text-anchor="middle" fill="#f0e2c0" font-size="10" font-family="Pixelify Sans, sans-serif">MENÚ</text>`;
+      for (let i = 0; i < 4; i++) {
+        const tx = x + 30 + i * 92;
+        s += `<rect x="${tx}" y="${piso - 30}" width="56" height="6" rx="2" fill="#d9dee0"/><rect x="${tx + 25}" y="${piso - 24}" width="6" height="24" fill="#8a9296"/>`;
+        s += `<rect x="${tx - 14}" y="${piso - 20}" width="12" height="4" fill="#b8642a"/><rect x="${tx - 12}" y="${piso - 34}" width="3" height="34" fill="#8a4a1e"/>`;
+        s += `<rect x="${tx + 58}" y="${piso - 20}" width="12" height="4" fill="#b8642a"/><rect x="${tx + 67}" y="${piso - 34}" width="3" height="34" fill="#8a4a1e"/>`;
+      }
+      break;
+    case 'FILTRO_AGUA':
+      s += `<rect x="${x}" y="${y + 18}" width="${w}" height="8" fill="#7f8f99"/><rect x="${x + 120}" y="${y + 18}" width="8" height="${piso - y - 50}" fill="#7f8f99"/>`;
+      s += `<rect x="${x + 24}" y="${y + 44}" width="70" height="${piso - y - 44}" rx="14" fill="#9aa8b0" stroke="#5c6a72" stroke-width="3"/>`;
+      for (let i = 0; i < 3; i++) s += `<rect x="${x + 24}" y="${y + 62 + i * 28}" width="70" height="5" fill="#6d7b83"/>`;
+      s += `<rect x="${x + 50}" y="${y + 36}" width="18" height="10" fill="#6d7b83"/>`;
+      s += `<g id="tanque"><rect x="${x + 210}" y="${y + 56}" width="70" height="${piso - y - 56}" rx="6" fill="#0d2230" stroke="#9ab4c2" stroke-width="3"/>`;
+      s += `<rect id="agua" class="agua" x="${x + 214}" y="${y + 80}" width="62" height="${piso - y - 84}" rx="4" fill="#2f9be0" opacity=".8"/></g>`;
+      s += `<rect x="${x + 300}" y="${y + 70}" width="70" height="44" rx="3" fill="#202a30" stroke="#7f8f99" stroke-width="2"/>`;
+      s += `<rect x="${x + 306}" y="${y + 76}" width="58" height="26" fill="#0c2a16"/><rect x="${x + 310}" y="${y + 82}" width="34" height="3" fill="#5be36b"/><rect x="${x + 310}" y="${y + 90}" width="44" height="3" fill="#5be36b" class="parpadea-lento"/>`;
+      s += `<circle cx="${x + 160}" cy="${y + 52}" r="7" fill="#f0a030" class="parpadea"/>`;
+      break;
+    case 'DORMITORIOS':
+      for (const bx of [x + 20, x + 270]) {
+        s += `<rect x="${bx}" y="${y + 48}" width="6" height="${piso - y - 48}" fill="#6a6f72"/><rect x="${bx + 104}" y="${y + 48}" width="6" height="${piso - y - 48}" fill="#6a6f72"/>`;
+        s += `<rect x="${bx + 6}" y="${y + 70}" width="98" height="11" fill="#3f6fae"/><rect x="${bx + 8}" y="${y + 63}" width="22" height="8" rx="2" fill="#eef2f3"/>`;
+        s += `<rect x="${bx + 6}" y="${piso - 24}" width="98" height="11" fill="#3f6fae"/><rect x="${bx + 8}" y="${piso - 31}" width="22" height="8" rx="2" fill="#eef2f3"/>`;
+      }
+      s += `<rect x="${x + 160}" y="${y + 50}" width="40" height="${piso - y - 50}" fill="#7d878c" stroke="#4d5559" stroke-width="2"/><rect x="${x + 202}" y="${y + 50}" width="40" height="${piso - y - 50}" fill="#737d82" stroke="#4d5559" stroke-width="2"/>`;
+      for (const lx of [x + 166, x + 208]) for (let i = 0; i < 3; i++) s += `<rect x="${lx}" y="${y + 58 + i * 5}" width="28" height="2" fill="#4d5559"/>`;
+      s += `<rect x="${x + 340}" y="${y + 18}" width="34" height="26" fill="#c94a3a" stroke="#2b1d12"/><text x="${x + 357}" y="${y + 36}" text-anchor="middle" fill="#fff" font-size="10">AP4</text>`;
+      break;
+  }
+  return s;
+}
+
+// ================= Sprites =================
+function filasSprite(rol, paso) {
+  const cfg = SPRITE_ROL[rol] || SPRITE_ROL.GUARDIA;
+  return SPRITE_BASE.map((f, i) => (paso && PIERNAS_PASO[i]) || cfg.filas[i] || f);
+}
+function paletaSprite(rol, id) {
+  const cfg = SPRITE_ROL[rol] || SPRITE_ROL.GUARDIA;
+  return {
+    o: '#1a120e', h: PELOS[hash(id) % PELOS.length], s: PIELES[hash(id * 7 + 3) % PIELES.length], e: '#141414', m: '#8a4b3a',
+    c: cfg.c, d: cfg.d, a: cfg.a || '#e6b422', y: cfg.y || '#f1c40f', g: cfg.g || '#46552c', w: cfg.w || '#fff',
+    p: cfg.p || '#2f3640', b: '#2b2b2b'
+  };
+}
+/** Pixeles del sprite en coordenadas 1x1 (sin escalar). */
+function pixeles(rol, id, paso, filasMax = 18) {
+  const g = svg('g', { 'shape-rendering': 'crispEdges' });
+  const paleta = paletaSprite(rol, id);
+  filasSprite(rol, paso).slice(0, filasMax).forEach((fila, yy) => {
+    let xx = 0;
+    while (xx < fila.length) {
+      const ch = fila[xx];
+      let fin = xx + 1;
+      while (fin < fila.length && fila[fin] === ch) fin++;
+      if (ch !== '.') g.appendChild(svg('rect', { x: xx, y: yy, width: fin - xx, height: 1, fill: paleta[ch] }));
+      xx = fin;
+    }
+  });
+  return g;
+}
+function spriteSvg(rol, id, paso) {
+  const g = pixeles(rol, id, paso);
+  g.setAttribute('transform', `translate(${-6 * ESCALA},${-18 * ESCALA}) scale(${ESCALA})`);
+  return g;
+}
+/** Cara del habitante para listas y paneles (HTML). */
+function caraHtml(id, tam = 28) {
+  const f = ficha(id);
+  const cont = svg('svg', { viewBox: '-1 0 14 10', width: tam, height: tam * 10 / 14 });
+  cont.appendChild(pixeles(f ? f.rol : 'GUARDIA', id, false, 10));
+  return cont.outerHTML;
+}
+function coronaSvg() {
+  const g = svg('g', { 'shape-rendering': 'crispEdges' });
+  CORONA.forEach((fila, yy) => [...fila].forEach((ch, xx) => {
+    if (ch !== '.') g.appendChild(svg('rect', { x: xx, y: yy, width: 1, height: 1, fill: '#ffd54a' }));
+  }));
+  g.appendChild(svg('rect', { x: 3, y: 2, width: 1, height: 1, fill: '#e03131' }));
+  return g;
+}
+
+// ================= Avatares =================
+function crearEntidad(s, pos) {
+  const g = svg('g', { class: 'avatar' });
+  g.addEventListener('click', (ev) => { ev.stopPropagation(); seleccionar(s.id); });
+  const anillo = svg('ellipse', { class: 'anillo', cx: 0, cy: 1, rx: 20, ry: 6 });
+  const sombra = svg('ellipse', { cx: 0, cy: 1, rx: 13, ry: 3.5, fill: '#000', opacity: 0.45 });
+  const cuerpo = svg('g');
+  const tag = svg('g');
+  const tagFondo = svg('rect', { y: -70, height: 17, rx: 4, fill: '#0c1612', 'fill-opacity': 0.88, 'stroke-width': 1.5 });
+  const tagTexto = svg('text', { class: 'tag-txt', x: 0, y: -57.5, 'text-anchor': 'middle', fill: '#ece6c8' });
+  const barra = svg('rect', { x: -14, y: -52, width: 0, height: 3, rx: 1 });
+  tag.append(tagFondo, tagTexto, barra);
+  const insignias = svg('text', { x: 20, y: -30, 'font-size': 12, 'text-anchor': 'middle' });
+  const corona = coronaSvg();
+  corona.setAttribute('transform', 'translate(-10.5,-86) scale(3)');
+  g.append(anillo, sombra, cuerpo, tag, insignias, corona);
+  $('capa-avatares').appendChild(g);
+  const e = { id: s.id, g, anillo, cuerpo, tagFondo, tagTexto, barra, insignias, corona, x: pos.x, y: pos.y, ruta: [], dir: 1, fase: 0, rol: null, frames: null };
+  ents.set(s.id, e);
+  return e;
+}
+
+function actualizarAspecto(e, s) {
+  if (e.rol !== s.rol) {
+    e.cuerpo.innerHTML = '';
+    const a = spriteSvg(s.rol, s.id, false);
+    const b = spriteSvg(s.rol, s.id, true);
+    b.style.display = 'none';
+    e.cuerpo.append(a, b);
+    e.frames = [a, b];
+    e.rol = s.rol;
+  }
+  const info = ROL_INFO[s.rol];
+  const alta = s.paranoia > 80;
+  e.tagTexto.textContent = (alta ? '! ' : info.icono + ' ') + nombre(s.id);
+  e.tagTexto.setAttribute('fill', alta ? '#ffb4b4' : '#ece6c8');
+  const ancho = Math.max(40, [...e.tagTexto.textContent].length * 6.6 + 12);
+  e.tagFondo.setAttribute('x', -ancho / 2);
+  e.tagFondo.setAttribute('width', ancho);
+  e.tagFondo.setAttribute('stroke', alta ? '#e5484d' : info.color);
+  e.barra.setAttribute('width', 28 * s.paranoia / 100);
+  e.barra.setAttribute('fill', colorParanoia(s.paranoia));
+  e.corona.style.display = juego.liderMoral === s.id ? '' : 'none';
+  e.insignias.textContent = juego.puente === s.id ? '🔗' : '';
+  e.g.classList.toggle('sel', seleccionado === s.id);
+  e.g.classList.toggle('marcado', marcas.has(s.id));
+  e.g.classList.toggle('atenuado', (!!atenuados && !atenuados.has(s.id)) || (!!enfoqueRel && !enfoqueRel.has(s.id)));
+  e.anillo.style.stroke = marcas.has(s.id) ? marcas.get(s.id) : '';
+}
+
+function sincronizarAvatares(caminar) {
+  const destinos = puestos();
+  const vivos = new Set(juego.sobrevivientes.map((s) => s.id));
+  for (const [id, e] of ents) if (!vivos.has(id)) { e.g.remove(); ents.delete(id); }
+  for (const s of juego.sobrevivientes) {
+    const destino = destinos.get(s.id);
+    let e = ents.get(s.id);
+    if (!e) e = crearEntidad(s, destino);
+    actualizarAspecto(e, s);
+    if (!caminar) { e.x = destino.x; e.y = destino.y; e.ruta = []; continue; }
+    if (Math.abs(e.x - destino.x) < 1 && Math.abs(e.y - destino.y) < 1) continue;
+    if (Math.abs(e.y - destino.y) < 2) e.ruta = [destino];
+    else {
+      const eje = EJE_X + ((s.id % 3) - 1) * 7;
+      e.ruta = [{ x: eje, y: e.y }, { x: eje, y: destino.y }, destino];
+    }
+  }
+  const cuenta = {};
+  for (const s of juego.sobrevivientes) cuenta[s.sala] = (cuenta[s.sala] || 0) + 1;
+  for (const sala of Object.keys(SALAS)) {
+    const t = $('cuenta-' + sala);
+    if (t) t.textContent = cuenta[sala] ? '👤 ' + cuenta[sala] : '';
+  }
+}
+
+function esperarLlegada(maximo = 6000) {
+  return new Promise((resolve) => {
+    const inicio = performance.now();
+    (function revisar() {
+      const moviendo = [...ents.values()].some((e) => e.ruta.length);
+      if (!moviendo || performance.now() - inicio > maximo) resolve();
+      else setTimeout(revisar, 60);
+    })();
+  });
+}
+
+// ================= Bucle de animación =================
+function tick(ahora) {
+  const dt = Math.min(0.05, (ahora - ultimoTick) / 1000);
+  ultimoTick = ahora;
+  for (const e of ents.values()) {
+    let moviendo = false;
+    if (e.ruta.length) {
+      const obj = e.ruta[0];
+      const dx = obj.x - e.x, dy = obj.y - e.y;
+      const d = Math.hypot(dx, dy);
+      const avance = VEL_CAMINAR * velocidad * dt;
+      if (d <= avance) { e.x = obj.x; e.y = obj.y; e.ruta.shift(); }
+      else { e.x += dx / d * avance; e.y += dy / d * avance; }
+      if (Math.abs(dx) > 1) e.dir = dx < 0 ? -1 : 1;
+      e.fase += dt * 9 * velocidad;
+      moviendo = true;
+    }
+    const paso = moviendo && Math.floor(e.fase) % 2 === 1;
+    if (e.frames) { e.frames[0].style.display = paso ? 'none' : ''; e.frames[1].style.display = paso ? '' : 'none'; }
+    const salto = moviendo ? -Math.abs(Math.sin(e.fase * Math.PI)) * 1.5 : 0;
+    e.g.setAttribute('transform', `translate(${e.x.toFixed(1)},${(e.y + salto).toFixed(1)})`);
+    e.cuerpo.setAttribute('transform', e.dir < 0 ? 'scale(-1,1)' : '');
+  }
+  actualizarLineas();
+  requestAnimationFrame(tick);
+}
+
+function centro(id) {
+  const e = ents.get(id);
+  return e ? { x: e.x, y: e.y - 24 } : null;
+}
+function trazo(a, b, curva, recorteIni, recorteFin) {
+  const p = centro(a), q = centro(b);
+  if (!p || !q) return '';
+  const dx = q.x - p.x, dy = q.y - p.y;
+  const d = Math.hypot(dx, dy) || 1;
+  const ux = dx / d, uy = dy / d;
+  const px = p.x + ux * recorteIni, py = p.y + uy * recorteIni;
+  const qx = q.x - ux * recorteFin, qy = q.y - uy * recorteFin;
+  if (!curva) return `M${px.toFixed(1)},${py.toFixed(1)} L${qx.toFixed(1)},${qy.toFixed(1)}`;
+  const mx = (px + qx) / 2 - uy * curva, my = (py + qy) / 2 + ux * curva;
+  return `M${px.toFixed(1)},${py.toFixed(1)} Q${mx.toFixed(1)},${my.toFixed(1)} ${qx.toFixed(1)},${qy.toFixed(1)}`;
+}
+
+/**
+ * Flechas de la red de confianza (los arcos que calculó Java).
+ * Ocultas por defecto: se ven todas con el botón "Red", o solo las de un habitante
+ * desde su menú (confía en / confían en él / todas).
+ */
+function construirRed() {
+  const capa = $('capa-red');
+  capa.innerHTML = '';
+  lineasRed = [];
+  enfoqueRel = null;
+  const soloUno = !verRed && seleccionado && modoRelacion;
+  if (!verRed && !soloUno) { refrescarAspecto(); return; }
+  if (soloUno) enfoqueRel = new Set([seleccionado]);
+  for (const r of grafo.relaciones) {
+    let ab = r.tipoAB, ba = r.tipoBA;
+    if (soloUno) {
+      if (r.a !== seleccionado && r.b !== seleccionado) continue;
+      // ab es el sentido a→b: se queda solo lo que pide el filtro
+      const salidaDesdeA = r.a === seleccionado;
+      if (modoRelacion === 'salientes') { if (salidaDesdeA) ba = null; else ab = null; }
+      if (modoRelacion === 'entrantes') { if (salidaDesdeA) ab = null; else ba = null; }
+      const otro = salidaDesdeA ? r.b : r.a;
+      if ((ab && ab !== 'DESCONOCIDO') || (ba && ba !== 'DESCONOCIDO')) enfoqueRel.add(otro);
+    }
+    const pesoAB = r.pesoAB, pesoBA = r.pesoBA;
+    const fmt = (p) => (Number.isInteger(p) ? String(p) : p.toFixed(1));
+    if (ab === 'AMISTAD' && ba === 'AMISTAD') {
+      lineasRed.push({ a: r.a, b: r.b, curva: 0, color: '#5be36b', ancho: 3, inicio: 'url(#m-verde)', fin: 'url(#m-verde)', texto: `${fmt(pesoAB)} ⇄ ${fmt(pesoBA)}` });
+      continue;
+    }
+    if (ab === 'ENEMISTAD' && ba === 'ENEMISTAD') {
+      lineasRed.push({ a: r.a, b: r.b, curva: 0, color: '#e5484d', ancho: 3, inicio: 'url(#m-rojo)', fin: 'url(#m-rojo)', texto: '⚔' });
+      continue;
+    }
+    for (const [o, d, t, p] of [[r.a, r.b, ab, pesoAB], [r.b, r.a, ba, pesoBA]]) {
+      if (t === 'AMISTAD') lineasRed.push({ a: o, b: d, curva: 10, color: '#5be36b', ancho: 2.4, guiones: '7 5', fin: 'url(#m-verde)', texto: fmt(p) });
+      if (t === 'ENEMISTAD') lineasRed.push({ a: o, b: d, curva: 10, color: '#e5484d', ancho: 2.6, fin: 'url(#m-rojo)', texto: '⚔' });
+    }
+  }
+  for (const l of lineasRed) {
+    const apagada = verRed && seleccionado && l.a !== seleccionado && l.b !== seleccionado;
+    const ancho = soloUno ? l.ancho + 1 : l.ancho;
+    l.sombra = svg('path', { fill: 'none', stroke: '#06100a', 'stroke-width': ancho + 3, opacity: apagada ? 0.05 : 0.6, 'stroke-linecap': 'round' });
+    l.el = svg('path', { fill: 'none', stroke: l.color, 'stroke-width': ancho, 'stroke-linecap': 'round', opacity: apagada ? 0.08 : 0.95 });
+    if (l.guiones) l.el.setAttribute('stroke-dasharray', l.guiones);
+    if (l.inicio) l.el.setAttribute('marker-start', l.inicio);
+    if (l.fin) l.el.setAttribute('marker-end', l.fin);
+    capa.append(l.sombra, l.el);
+    if (soloUno) {
+      // Etiqueta con la afinidad (peso del arco) en el medio de la flecha
+      l.etq = svg('g');
+      const ancho = Math.max(18, [...l.texto].length * 7 + 8);
+      l.etq.append(
+        svg('rect', { x: -ancho / 2, y: -9, width: ancho, height: 16, rx: 4, fill: '#0c1612', stroke: l.color, 'stroke-width': 1.5 }),
+        Object.assign(svg('text', { x: 0, y: 3, 'text-anchor': 'middle', 'font-size': 11, fill: '#ece6c8', 'font-family': 'Pixelify Sans, sans-serif' }), { textContent: l.texto })
+      );
+      capa.appendChild(l.etq);
+    }
+  }
+  refrescarAspecto();
+}
+
+function construirMarcas() {
+  const capa = $('capa-marcas');
+  capa.innerHTML = '';
+  for (const l of lineasMarca) {
+    l.el = svg('path', { fill: 'none', stroke: l.color, 'stroke-width': l.ancho || 4, 'stroke-linecap': 'round', opacity: 0.95, filter: 'url(#f-brillo)' });
+    if (l.guiones) l.el.setAttribute('stroke-dasharray', l.guiones);
+    capa.appendChild(l.el);
+  }
+}
+
+function actualizarLineas() {
+  for (const l of lineasRed) {
+    const d = trazo(l.a, l.b, l.curva, l.inicio ? 18 : 12, 18);
+    l.el.setAttribute('d', d);
+    l.sombra.setAttribute('d', d);
+    if (l.etq) {
+      const p = centro(l.a), q = centro(l.b);
+      if (p && q) {
+        const dx = q.x - p.x, dy = q.y - p.y, dist = Math.hypot(dx, dy) || 1;
+        const mx = (p.x + q.x) / 2 - (dy / dist) * l.curva / 2, my = (p.y + q.y) / 2 + (dx / dist) * l.curva / 2;
+        l.etq.setAttribute('transform', `translate(${mx.toFixed(1)},${my.toFixed(1)})`);
+      }
+    }
+  }
+  posicionarMenu();
+  for (const l of lineasMarca) l.el.setAttribute('d', trazo(l.a, l.b, 0, 0, 0));
+}
+
+// ================= Efectos =================
+function burbuja(id, texto, color) {
+  const p = centro(id);
+  if (!p) return;
+  const g = svg('g', { transform: `translate(${p.x},${p.y - 58})` });
+  const interno = svg('g', { class: 'burbuja' });
+  const ancho = Math.max(28, [...texto].length * 10 + 12);
+  interno.append(
+    svg('rect', { x: -ancho / 2, y: -14, width: ancho, height: 24, rx: 7, fill: '#0c1612', stroke: color, 'stroke-width': 2 }),
+    Object.assign(svg('text', { x: 0, y: 3, 'text-anchor': 'middle', 'font-size': 14, fill: color }), { textContent: texto })
+  );
+  g.appendChild(interno);
+  $('capa-fx').appendChild(g);
+  setTimeout(() => g.remove(), 2000);
+}
+function rayo(a, b, color) {
+  const d = trazo(a, b, 0, 0, 0);
+  if (!d) return;
+  const el = svg('path', { d, fill: 'none', stroke: color, 'stroke-width': 5, 'stroke-linecap': 'round', filter: 'url(#f-brillo)', class: 'desvanece' });
+  $('capa-fx').appendChild(el);
+  setTimeout(() => el.remove(), 1700);
+}
+function pulsoRadar(id, color) {
+  const p = centro(id);
+  if (!p) return;
+  const c = svg('circle', { cx: p.x, cy: p.y, r: 20, fill: 'none', stroke: color, 'stroke-width': 3, class: 'radar' });
+  $('capa-fx').appendChild(c);
+  setTimeout(() => c.remove(), 1050);
+}
+function viajar(a, b, color, ms) {
+  return new Promise((resolve) => {
+    const p = centro(a), q = centro(b);
+    if (!p || !q) { resolve(); return; }
+    const punto = svg('circle', { r: 7, fill: color, filter: 'url(#f-brillo)' });
+    const estela = svg('line', { x1: p.x, y1: p.y, x2: p.x, y2: p.y, stroke: color, 'stroke-width': 4, opacity: 0.7, 'stroke-linecap': 'round' });
+    $('capa-fx').append(estela, punto);
+    const t0 = performance.now();
+    const dur = ms / velocidad;
+    (function paso(ahora) {
+      const t = Math.min(1, (ahora - t0) / dur);
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      const x = p.x + (q.x - p.x) * e, y = p.y + (q.y - p.y) * e;
+      punto.setAttribute('cx', x); punto.setAttribute('cy', y);
+      estela.setAttribute('x2', x); estela.setAttribute('y2', y);
+      if (t < 1) requestAnimationFrame(paso);
+      else { punto.remove(); estela.classList.add('desvanece'); setTimeout(() => estela.remove(), 1600); resolve(); }
+    })(performance.now());
+  });
+}
+function temblor() {
+  const m = $('mapa-cont');
+  m.classList.remove('temblor');
+  void m.offsetWidth;
+  m.classList.add('temblor');
+}
+function avisoCentro(titulo, detalle, color, ms = 1800) {
+  const a = $('aviso-centro');
+  a.style.color = color;
+  a.innerHTML = esc(titulo) + (detalle ? `<small>${esc(detalle)}</small>` : '');
+  a.classList.add('visible');
+  clearTimeout(avisoCentro._t);
+  avisoCentro._t = setTimeout(() => a.classList.remove('visible'), ms / Math.min(velocidad, 1.5));
+}
+function alertaSala(sala, color) {
+  const r = $('alerta-' + sala);
+  if (!r) return;
+  r.setAttribute('fill', color);
+  r.animate([{ opacity: 0 }, { opacity: 0.25 }, { opacity: 0 }], { duration: 900 });
+}
+
+// ================= Bitácora =================
+function registrar(tipo, texto, enMapa = true) {
+  const estilo = ESTILO_EVENTO[tipo] || ESTILO_EVENTO.SISTEMA;
+  const dia = juego ? String(juego.turno).padStart(2, '0') : '00';
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="t">[Día ${dia}]</span><span style="color:${estilo.color}">${estilo.icono} ${esc(texto)}</span>`;
+  const lista = $('bitacora');
+  lista.prepend(div);
+  while (lista.children.length > 200) lista.lastChild.remove();
+  if (!enMapa) return;
+  const f = document.createElement('div');
+  f.style.borderLeftColor = estilo.color;
+  f.innerHTML = `<span style="color:${estilo.color}">${estilo.icono}</span> ${esc(texto)}`;
+  const feed = $('feed');
+  feed.prepend(f);
+  while (feed.children.length > 3) feed.lastChild.remove();
+  setTimeout(() => f.remove(), 7000);
+}
+
+async function mostrarEventos(eventos) {
+  const pausa = eventos.length > 7 ? 260 : 480;
+  for (const ev of eventos) {
+    const estilo = ESTILO_EVENTO[ev.tipo] || ESTILO_EVENTO.SISTEMA;
+    registrar(ev.tipo, ev.texto);
+    const [a, b, c] = ev.ids;
+    switch (ev.tipo) {
+      case 'CONFIANZA': case 'ALIANZA': case 'FORTALECE':
+        if (a && b) rayo(a, b, estilo.color);
+        if (a) burbuja(a, ev.tipo === 'ALIANZA' ? '❤' : estilo.icono, estilo.color);
+        if (b && ev.tipo === 'ALIANZA') burbuja(b, '❤', estilo.color);
+        break;
+      case 'SOSPECHA':
+        if (a) burbuja(a, '👁', estilo.color);
+        if (b) burbuja(b, '?', estilo.color);
+        break;
+      case 'TRAICION':
+        if (a && b) rayo(a, b, estilo.color);
+        if (a) burbuja(a, '🗡', estilo.color);
+        if (b) burbuja(b, '💔', estilo.color);
+        temblor();
+        alertaSala('FILTRO_AGUA', '#e5484d');
+        avisoCentro('¡TRAICIÓN!', ev.texto.replace('¡TRAICIÓN! ', ''), '#e5484d', 2600);
+        break;
+      case 'CONFLICTO':
+        if (a) burbuja(a, '⚡', estilo.color);
+        if (b) burbuja(b, '⚡', estilo.color);
+        if (ev.sala) alertaSala(ev.sala, '#ff7a45');
+        break;
+      case 'MEDIACION':
+        if (c) { burbuja(c, '🕊', estilo.color); if (a) rayo(c, a, estilo.color); if (b) rayo(c, b, estilo.color); }
+        break;
+      case 'CALMA':
+        ev.ids.slice(1).forEach((id) => burbuja(id, '✚', estilo.color));
+        break;
+      case 'ALERTA':
+        if (a) { burbuja(a, '!', estilo.color); pulsoRadar(a, estilo.color); }
+        break;
+      case 'CRISIS':
+        temblor();
+        avisoCentro('⚠ EMERGENCIA', ev.texto, '#e5484d', 2600);
+        break;
+      case 'RESUELTA':
+        if (a) { burbuja(a, '✔', estilo.color); pulsoRadar(a, estilo.color); }
+        avisoCentro('EMERGENCIA RESUELTA', ev.texto, '#5be36b', 2200);
+        break;
+      case 'MANDO':
+        if (a) burbuja(a, '★', estilo.color);
+        break;
+    }
+    await espera(pausa);
+  }
+}
+
+// ================= Sincronización con Java =================
+function aplicarGrafo(nuevo) {
+  grafo = nuevo;
+  arcos = new Map();
+  for (const r of grafo.relaciones) {
+    arcos.set(r.a + '>' + r.b, r.tipoAB);
+    arcos.set(r.b + '>' + r.a, r.tipoBA);
+  }
+}
+
+async function recargar(caminar = false) {
+  const [g, j] = await Promise.all([api('GET', '/api/estado'), api('GET', '/api/refugio/estado')]);
+  aplicarGrafo(g);
+  juego = j;
+  if (seleccionado && !usuario(seleccionado)) seleccionado = null;
+  sincronizarAvatares(caminar);
+  construirRed();
+  refrescarPaneles();
+  return j;
+}
+
+function refrescarPaneles() {
+  renderMenu();
+  actualizarHUD();
+  actualizarSelectores();
+  actualizarLista();
+  actualizarFicha();
+  actualizarInfluencia();
+}
+
+function actualizarHUD() {
+  if (!juego) return;
+  $('hud-dia').textContent = juego.turno;
+  $('hud-habitantes').textContent = juego.sobrevivientes.length;
+  $('hud-alianzas').textContent = juego.alianzas;
+  let enemistades = 0;
+  for (const t of arcos.values()) if (t === 'ENEMISTAD') enemistades++;
+  $('hud-enemistades').textContent = enemistades;
+  $('hud-lider-moral').textContent = juego.liderMoral > 0 ? nombre(juego.liderMoral) : '—';
+  const crisis = juego.crisis;
+  const agua = !(crisis && crisis.tipo === 'AVERIA_AGUA');
+  $('hud-agua').textContent = agua ? 'OK' : '¡!';
+  $('hud-agua').style.color = agua ? '' : 'var(--rojo)';
+
+  const tension = 100 - juego.estabilidad;
+  const llenos = Math.round(tension / 100 * 18);
+  const cont = $('segmentos');
+  if (!cont.children.length) for (let i = 0; i < 18; i++) cont.appendChild(document.createElement('span'));
+  [...cont.children].forEach((seg, i) => {
+    const t = i / 17;
+    const color = t < 0.35 ? '#e0c040' : t < 0.65 ? '#f08a30' : '#e5484d';
+    seg.style.background = i < llenos ? color : '#2a1a1a';
+  });
+  const nivel = { ESTABLE: 'baja', TENSO: 'media', CRITICO: 'CRÍTICA' }[juego.nivel];
+  $('hud-tension').textContent = `· ${tension}% ${nivel}`;
+  $('hud-estab-barra').style.width = juego.estabilidad + '%';
+
+  $('banner-crisis').classList.toggle('oculto', !crisis);
+  $('alarma').classList.toggle('activa', !!crisis || juego.estabilidad < 35);
+  if (crisis) $('crisis-texto').textContent = `${crisis.texto} Se necesita: ${ROL_INFO[crisis.rol].etiqueta}` + (crisis.turnos ? ` · ${crisis.turnos} día(s) sin resolver` : '');
+  const tanque = $('agua');
+  if (tanque) tanque.setAttribute('fill', agua ? '#2f9be0' : '#b33b3b');
+  $('sos-estado').innerHTML = crisis
+    ? `<span style="color:var(--rojo)">🚨 Buscando ${ROL_INFO[crisis.rol].etiqueta}</span>`
+    : `Buscando ${ROL_INFO[$('sos-rol').value || 'INGENIERO'].etiqueta}`;
+}
+
+function actualizarLista() {
+  if (!juego) return;
+  $('cuenta-habitantes').textContent = juego.sobrevivientes.length;
+  const tieneAlianza = new Set();
+  for (const r of grafo.relaciones) if (r.tipoAB === 'AMISTAD' && r.tipoBA === 'AMISTAD') { tieneAlianza.add(r.a); tieneAlianza.add(r.b); }
+  $('lista-habitantes').innerHTML = juego.sobrevivientes.map((s) => {
+    const u = usuario(s.id);
+    if (!u) return '';
+    const entrantes = u.gradoEntrada;
+    let estado = '<span style="color:#5be36b">✓</span>';
+    if (s.paranoia > 80) estado = '<span style="color:#f0a030">⚠</span>';
+    else if (!tieneAlianza.has(s.id)) estado = '<span style="color:#e5484d">✖</span>';
+    const extra = (juego.liderMoral === s.id ? ' 👑' : '') + (juego.puente === s.id ? ' 🔗' : '');
+    return `<div class="habitante ${seleccionado === s.id ? 'sel' : ''}" onclick="seleccionar(${s.id})" title="Paranoia ${s.paranoia} · confían en él: ${entrantes}">
+      <div class="cara">${caraHtml(s.id, 24)}</div>
+      <div class="nom">${esc(u.nombre)} <span style="color:${ROL_INFO[s.rol].color}">(${ROL_INFO[s.rol].etiqueta})</span>${extra}</div>
+      <div class="est">${estado}</div></div>`;
+  }).join('');
+}
+
+function opcionesHabitantes(valor) {
+  return grafo.usuarios.map((u) => {
+    const f = ficha(u.id);
+    return `<option value="${u.id}" ${u.id === valor ? 'selected' : ''}>${f ? ROL_INFO[f.rol].icono + ' ' : ''}${esc(u.nombre)}</option>`;
+  }).join('');
+}
+
+function actualizarSelectores() {
+  for (const id of ['sos-origen', 'med-a', 'med-b', 'rel-origen', 'rel-destino', 'sel-expulsar']) {
+    const el = $(id);
+    const previo = Number(el.value) || null;
+    let valor = previo && usuario(previo) ? previo : null;
+    if (!valor) {
+      if (id === 'sos-origen') valor = juego.lider;
+      else if (id === 'med-b' || id === 'rel-destino') valor = grafo.usuarios[1] ? grafo.usuarios[1].id : null;
+      else valor = grafo.usuarios[0] ? grafo.usuarios[0].id : null;
+    }
+    el.innerHTML = opcionesHabitantes(valor);
+  }
+  const sosRol = $('sos-rol');
+  const rolPrevio = sosRol.value;
+  sosRol.innerHTML = Object.entries(ROL_INFO).filter(([k]) => k !== 'LIDER').map(([k, v]) => `<option value="${k}">${v.icono} ${v.etiqueta}</option>`).join('');
+  sosRol.value = juego.crisis ? juego.crisis.rol : (rolPrevio || 'INGENIERO');
+}
+
+/** Centralidad (top 3) y mini red de todo el refugio, coloreada por facción. */
+async function actualizarInfluencia() {
+  if (!grafo.usuarios.length) { $('centralidad').innerHTML = ''; $('mini-red').innerHTML = ''; return; }
+  try {
+    const [inf, com] = await Promise.all([api('GET', '/api/influencia?n=4'), api('GET', '/api/comunidades')]);
+    comunidadesCache = com.comunidades;
+    const n = Math.max(1, grafo.usuarios.length - 1);
+    $('centralidad').innerHTML = inf.ranking.map((x) => `
+      <div onclick="seleccionar(${x.id})">${juego.liderMoral === x.id ? '👑' : juego.puente === x.id ? '🔗' : '•'} ${esc(x.nombre)}</div>
+      <div style="color:var(--verde)">Centralidad: ${Math.round(x.gradoEntrada / n * 100)}%</div>`).join('');
+    dibujarMiniRed();
+  } catch (e) { /* secundario */ }
+}
+
+function dibujarMiniRed() {
+  const W = 330, H = 170;
+  const grupo = new Map();
+  comunidadesCache.forEach((c, i) => c.miembros.forEach((id) => { if (!grupo.has(id)) grupo.set(id, i); }));
+  const ids = grafo.usuarios.map((u) => u.id);
+  const pos = new Map();
+  ids.forEach((id, i) => {
+    const ang = (i / ids.length) * Math.PI * 2 - Math.PI / 2;
+    const r = 62 + (hash(id) % 3) * 6;
+    pos.set(id, { x: W / 2 + Math.cos(ang) * r * 1.9, y: H / 2 + Math.sin(ang) * r });
+  });
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">`;
+  for (const r of grafo.relaciones) {
+    const p = pos.get(r.a), q = pos.get(r.b);
+    if (!p || !q) continue;
+    const mutua = r.tipoAB === 'AMISTAD' && r.tipoBA === 'AMISTAD';
+    const enemigos = r.tipoAB === 'ENEMISTAD' || r.tipoBA === 'ENEMISTAD';
+    if (!mutua && !enemigos && r.tipoAB !== 'AMISTAD' && r.tipoBA !== 'AMISTAD') continue;
+    const ga = grupo.get(r.a), gb = grupo.get(r.b);
+    const color = enemigos ? '#e5484d' : ga !== undefined && ga === gb ? COLORES_GRUPO[ga % COLORES_GRUPO.length] : '#3fae9a';
+    s += `<line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="${color}" stroke-width="${mutua ? 1.4 : 0.8}" opacity="${mutua ? 0.75 : 0.4}"/>`;
+  }
+  for (const id of ids) {
+    const p = pos.get(id);
+    const u = usuario(id);
+    const g = grupo.get(id);
+    const color = g !== undefined ? COLORES_GRUPO[g % COLORES_GRUPO.length] : '#7d8f86';
+    const r = 3.5 + Math.min(5, (u ? u.gradoEntrada : 0) * 0.6);
+    s += `<circle cx="${p.x}" cy="${p.y}" r="${r + 3}" fill="${color}" opacity=".2"/><circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${color}" stroke="#0c1612" stroke-width="1.5" style="cursor:pointer" onclick="seleccionar(${id})"><title>${esc(nombre(id))}</title></circle>`;
+  }
+  $('mini-red').innerHTML = s + '</svg>';
+}
+
+// ================= Turnos =================
+async function siguienteTurno() {
+  if (ocupado) return;
+  if (!grafo.usuarios.length) { aviso('El refugio está vacío: carga una partida en Gestión.', true); return; }
+  ocupado = true;
+  $('btn-turno').disabled = true;
+  try {
+    if (marcas.size || lineasMarca.length) limpiarMarcas();
+    const r = await api('POST', '/api/refugio/turno');
+    const g = await api('GET', '/api/estado');
+    juego = r;
+    sincronizarAvatares(true);
+    actualizarHUD();
+    await esperarLlegada();
+    aplicarGrafo(g);
+    construirRed();
+    await mostrarEventos(r.eventos);
+    if (!r.eventos.length) registrar('SISTEMA', 'Día tranquilo: nadie cambió de opinión.');
+    refrescarPaneles();
+    if (juego.estabilidad < 25 && !siguienteTurno.avisoColapso) {
+      siguienteTurno.avisoColapso = true;
+      avisoCentro('☠ COLAPSO INMINENTE', 'La red de confianza se está rompiendo. Resuelve crisis y forma alianzas.', '#e5484d', 3200);
+    }
+    if (juego.estabilidad >= 40) siguienteTurno.avisoColapso = false;
+  } catch (e) {
+    aviso(e.message, true);
+    if (auto) alternarAuto();
+  } finally {
+    ocupado = false;
+    $('btn-turno').disabled = false;
+  }
+}
+
+async function bucleAuto() {
+  while (auto) {
+    if (!ocupado) await siguienteTurno();
+    await espera(1300);
+  }
+}
+function alternarAuto() {
+  auto = !auto;
+  $('btn-auto').textContent = auto ? '⏸ Pausa' : '▶ Auto';
+  $('btn-auto').classList.toggle('btn-naranja', auto);
+  if (auto) bucleAuto();
+}
+function cambiarVelocidad(v) {
+  velocidad = Number(v) || 1;
+  try { localStorage.setItem('refugio-velocidad', String(velocidad)); } catch (e) { /* sin almacenamiento */ }
+}
+function alternarRed() {
+  verRed = !verRed;
+  if (verRed) modoRelacion = null;
+  etiquetaRed();
+  try { localStorage.setItem('refugio-red-todas', verRed ? '1' : '0'); } catch (e) { /* sin almacenamiento */ }
+  construirRed();
+  renderMenu();
+}
+function etiquetaRed() {
+  $('btn-red').textContent = verRed ? '🔗 Ocultar red' : '🔗 Ver toda la red';
+  $('btn-red').classList.toggle('btn-verde', verRed);
+}
+
+// ================= Marcas =================
+function limpiarMarcas() {
+  marcas = new Map();
+  lineasMarca = [];
+  atenuados = null;
+  construirMarcas();
+  refrescarAspecto();
+}
+function refrescarAspecto() {
+  if (!juego) return;
+  for (const s of juego.sobrevivientes) { const e = ents.get(s.id); if (e) actualizarAspecto(e, s); }
+}
+function marcar(ids, color) { ids.forEach((id) => marcas.set(id, color)); refrescarAspecto(); }
+function unirMarcas(pares, color, guiones) {
+  for (const [a, b] of pares) lineasMarca.push({ a, b, color, guiones });
+  construirMarcas();
+}
+function bloquear(fn) {
+  return accion(async () => {
+    if (ocupado) { aviso('Espera a que termine el día.', true); return; }
+    ocupado = true;
+    try { await fn(); } finally { ocupado = false; }
+  });
+}
+function chip(id) {
+  return `<span class="chip" onclick="seleccionar(${id})">${esc(nombre(id))}</span>`;
+}
+
+// ================= Ruta SOS (BFS) =================
+function lanzarSOS(origenForzado, rolForzado) {
+  return bloquear(async () => {
+    const origen = origenForzado || Number($('sos-origen').value);
+    const rol = rolForzado || $('sos-rol').value;
+    if (!origen) throw new Error('No hay habitantes');
+    cambiarPestaña('analisis');
+    limpiarMarcas();
+    $('sos-estado').innerHTML = `<span class="flecha-verde">→</span> Buscando ${ROL_INFO[rol].etiqueta}…`;
+    const r = await api('POST', '/api/refugio/sos', { origen, rol });
+    const salida = $('res-sos');
+    salida.innerHTML = '';
+    for (const id of r.explorados) {
+      pulsoRadar(id, '#59c2e6');
+      marcas.set(id, '#2b6f8f');
+      refrescarAspecto();
+      await espera(170);
+    }
+    if (r.encontrada) {
+      marcar(r.camino, '#5be36b');
+      for (let i = 1; i < r.camino.length; i++) {
+        await viajar(r.camino[i - 1], r.camino[i], '#5be36b', 520);
+        unirMarcas([[r.camino[i - 1], r.camino[i]]], '#5be36b');
+      }
+      const ayudante = r.camino[r.camino.length - 1];
+      marcar([ayudante], '#ffd54a');
+      burbuja(ayudante, ROL_INFO[rol].icono, '#ffd54a');
+      salida.innerHTML = `<div class="cadena">${r.camino.map((id, i) => `
+          ${i ? '<div class="flecha-cadena">➜</div>' : ''}
+          <div class="eslabon ${i === r.camino.length - 1 ? 'final' : ''}" onclick="seleccionar(${id})">
+            <div class="circ">${caraHtml(id, 38)}</div><span>${esc(nombre(id))}</span></div>`).join('')}</div>
+        <div class="nota" style="text-align:center; margin:0">${r.camino.length - 1} salto(s) · el BFS revisó a ${r.explorados.length}</div>`;
+      $('sos-estado').innerHTML = `<span style="color:var(--verde)">✔ ${ROL_INFO[rol].etiqueta} encontrado</span>`;
+    } else {
+      salida.innerHTML = `<div style="color:#ff9a9a">✖ Ninguna cadena de confianza llega a un ${ROL_INFO[rol].etiqueta.toLowerCase()}. Revisados: ${r.explorados.length}.</div>`;
+      $('sos-estado').innerHTML = `<span style="color:var(--rojo)">✖ Sin ruta</span>`;
+      temblor();
+    }
+    juego = r;
+    await mostrarEventos(r.eventos);
+    actualizarHUD();
+    refrescarAspecto();
+  });
+}
+function sosDeCrisis() {
+  if (!juego || !juego.crisis) return;
+  $('sos-rol').value = juego.crisis.rol;
+  $('sos-origen').value = juego.lider;
+  lanzarSOS(juego.lider, juego.crisis.rol);
+}
+
+// ================= Motín (DFS) =================
+function escanearMotin() {
+  return bloquear(async () => {
+    cambiarPestaña('analisis');
+    limpiarMarcas();
+    const r = await api('GET', '/api/refugio/motin');
+    const salida = $('res-motin');
+    if (r.lider === -1) { salida.textContent = 'No hay líder.'; return; }
+    salida.innerHTML = `<div style="color:var(--naranja)">🔦 DFS desde ${esc(nombre(r.lider))}…</div>`;
+    marcar([r.lider], '#ffd54a');
+    for (let i = 1; i < r.barrido.length; i++) {
+      const v = r.barrido[i];
+      const previos = r.barrido.slice(0, i).filter((u) => arcos.get(u + '>' + v) === 'AMISTAD');
+      const padre = previos[previos.length - 1];
+      if (padre) { await viajar(padre, v, '#f0a030', 300); unirMarcas([[padre, v]], 'rgba(240,160,48,.6)', '5 5'); }
+      marcar([v], '#f0a030');
+      await espera(60);
+    }
+    if (r.noAlcanzados.length) marcar(r.noAlcanzados, '#e5484d');
+    const alto = r.grupos.some((g) => g.riesgo === 'ALTO');
+    const riesgo = r.grupos.length > 0;
+    let html = `<div class="caja-motin ${alto ? 'alto' : riesgo ? 'riesgo' : ''}">${miniMotin(r)}
+      <div class="lbl" style="color:${alto ? '#ff8a8a' : riesgo ? '#ffd27a' : '#8ef09a'}">${alto ? 'Sospecha de Motín' : riesgo ? 'Grupo cerrado vigilado' : 'Sin riesgo de motín'}</div></div>`;
+    html += `<div class="nota" style="margin:6px 0 0">La líder alcanza a ${r.barrido.length} de ${grafo.usuarios.length}. Kosaraju: ${r.componentes.length} componentes fuertemente conexas.</div>`;
+    if (r.noAlcanzados.length) html += `<div style="margin-top:4px">Sin cadena desde la líder: ${r.noAlcanzados.map(chip).join('')}</div>`;
+    if (riesgo) {
+      atenuados = new Set([r.lider]);
+      r.grupos.forEach((gr, i) => {
+        const color = gr.riesgo === 'ALTO' ? '#e5484d' : gr.riesgo === 'MEDIO' ? '#f0a030' : '#95a99d';
+        gr.miembros.forEach((id) => atenuados.add(id));
+        marcar(gr.miembros, color);
+        const pares = [];
+        for (const a of gr.miembros) for (const b of gr.miembros) if (a !== b && arcos.get(a + '>' + b) === 'AMISTAD') pares.push([a, b]);
+        unirMarcas(pares, color);
+        html += `<div style="margin-top:6px"><span class="insignia" style="background:${color};color:#0c1612">RIESGO ${gr.riesgo}</span> ${gr.miembros.map(chip).join('')}
+          <div class="nota" style="margin:2px 0 0">Cerrazón ${(gr.cerrazon * 100).toFixed(0)}% · ${gr.alcanzaLider ? 'aún llega a la líder' : 'ninguna cadena llega a la líder'}</div></div>`;
+      });
+      refrescarAspecto();
+      if (alto) {
+        temblor();
+        avisoCentro('🚨 SOSPECHA DE MOTÍN', 'Un grupo cerrado no tiene ninguna cadena de confianza hacia la líder.', '#e5484d', 2800);
+        registrar('CRISIS', 'Alerta de motín: ' + r.grupos.filter((g) => g.riesgo === 'ALTO').map((g) => g.miembros.map(nombre).join(', ')).join(' | '));
+      } else {
+        registrar('ALERTA', 'Escaneo de motín: hay grupos cerrados, pero aún conectados con la líder.');
+      }
+    } else {
+      registrar('SISTEMA', 'Escaneo de motín: todos los grupos están conectados con la líder.');
+    }
+    salida.innerHTML = html;
+  });
+}
+
+/** Mini diagrama: la líder a la izquierda y el grupo más riesgoso dentro de un círculo. */
+function miniMotin(r) {
+  const W = 300, H = 130;
+  const grupo = r.grupos.length ? r.grupos[0].miembros : (r.componentes.find((c) => c.includes(r.lider)) || [r.lider]).slice(0, 6);
+  const fuera = r.grupos.length ? [r.lider] : [];
+  const pos = new Map();
+  const cx = r.grupos.length ? 205 : 150, cy = 62, rad = Math.min(42, 16 + grupo.length * 5);
+  grupo.forEach((id, i) => {
+    const a = (i / grupo.length) * Math.PI * 2 - Math.PI / 2;
+    pos.set(id, { x: cx + Math.cos(a) * rad * 0.72, y: cy + Math.sin(a) * rad * 0.72 });
+  });
+  fuera.forEach((id) => pos.set(id, { x: 60, y: 62 }));
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block"><defs><marker id="mm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#5be36b"/></marker></defs>`;
+  if (r.grupos.length) s += `<circle cx="${cx}" cy="${cy}" r="${rad + 14}" fill="none" stroke="${r.grupos[0].riesgo === 'ALTO' ? '#e5484d' : '#f0a030'}" stroke-width="3"/>`;
+  for (const [a, p] of pos) for (const [b, q] of pos) {
+    if (a === b || arcos.get(a + '>' + b) !== 'AMISTAD') continue;
+    const dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy) || 1;
+    s += `<line x1="${p.x + dx / d * 12}" y1="${p.y + dy / d * 12}" x2="${q.x - dx / d * 13}" y2="${q.y - dy / d * 13}" stroke="#5be36b" stroke-width="2" marker-end="url(#mm)"/>`;
+  }
+  for (const [id, p] of pos) {
+    const f = ficha(id);
+    const g = pixeles(f ? f.rol : 'GUARDIA', id, false);
+    g.setAttribute('transform', `translate(${p.x - 7.2},${p.y - 10.8}) scale(1.2)`);
+    s += g.outerHTML;
+  }
+  return s + '</svg>';
+}
+
+// ================= Facciones y mediación =================
+function detectarFacciones() {
+  return accion(async () => {
+    const r = await api('GET', '/api/comunidades');
+    comunidadesCache = r.comunidades;
+    $('res-facciones').innerHTML = r.comunidades.length ? r.comunidades.map((c, i) => {
+      const color = COLORES_GRUPO[i % COLORES_GRUPO.length];
+      const pct = Math.round(c.densidad * 100);
+      return `<div style="margin-bottom:10px; cursor:pointer" onclick="verFaccion(${i})">
+        <div class="fila" style="justify-content:space-between"><b style="color:${color}">⚑ Facción ${c.id} · ${c.miembros.length}</b>
+        <span class="insignia" style="border:1px solid ${color}; color:${color}">${esc(c.fuerzaEtiqueta)}</span></div>
+        <div class="barra" style="margin:4px 0"><span style="width:${pct}%; background:${color}"></span></div>
+        <div class="nota" style="margin:0">Cohesión ${pct}%: ${c.conexiones} de ${c.posibles} parejas. Núcleo: ${c.nucleo.map(nombre).map(esc).join(', ')}.</div></div>`;
+    }).join('') : '<span class="sub">No hay triángulos de confianza mutua.</span>';
+    if (r.comunidades.length) verFaccion(0);
+  });
+}
+function verFaccion(i) {
+  const c = comunidadesCache[i];
+  if (!c) return;
+  const color = COLORES_GRUPO[i % COLORES_GRUPO.length];
+  limpiarMarcas();
+  atenuados = new Set(c.miembros);
+  marcar(c.miembros, color);
+  const pares = [];
+  for (let x = 0; x < c.miembros.length; x++) for (let y = x + 1; y < c.miembros.length; y++) {
+    const a = c.miembros[x], b = c.miembros[y];
+    if (arcos.get(a + '>' + b) === 'AMISTAD' && arcos.get(b + '>' + a) === 'AMISTAD') pares.push([a, b]);
+  }
+  unirMarcas(pares, color);
+  c.miembros.forEach((id) => pulsoRadar(id, color));
+}
+function buscarMediadores() {
+  return accion(async () => {
+    const a = Number($('med-a').value), b = Number($('med-b').value);
+    const r = await api('GET', `/api/en-comun?a=${a}&b=${b}`);
+    limpiarMarcas();
+    marcar([a], '#ff6bcb');
+    marcar([b], '#b388ff');
+    marcar(r.comunes, '#59c2e6');
+    atenuados = new Set([a, b, ...r.comunes]);
+    const pares = [];
+    r.comunes.forEach((c) => pares.push([a, c], [b, c]));
+    unirMarcas(pares, '#59c2e6', '6 4');
+    refrescarAspecto();
+    r.comunes.forEach((c) => burbuja(c, '🕊', '#59c2e6'));
+    const enemigos = [arcos.get(a + '>' + b), arcos.get(b + '>' + a)].includes('ENEMISTAD');
+    $('res-mediacion').innerHTML = r.comunes.length
+      ? `<div>Ambos confían en: ${r.comunes.map(chip).join('')}</div><div class="nota" style="margin:4px 0 0">${enemigos ? 'Son enemigos: si se cruzan, uno de estos puede mediar (50%).' : 'Si se pelean, estos pueden mediar.'}</div>`
+      : `<span style="color:${enemigos ? '#ff9a9a' : 'var(--tenue)'}">No confían en nadie en común${enemigos ? ': su enemistad no tiene quién la calme.' : '.'}</span>`;
+  });
+}
+
+// ================= Ficha =================
+/** Clic en un habitante (mapa, lista o chip): abre su menú. Otro clic sobre él lo cierra. */
+function seleccionar(id) {
+  if (seleccionado === id) { cerrarMenu(); return; }
+  seleccionado = id;
+  modoRelacion = null;
+  construirRed();
+  actualizarLista();
+  actualizarFicha();
+  renderMenu();
+}
+
+function cerrarMenu() {
+  seleccionado = null;
+  modoRelacion = null;
+  $('menu-hab').classList.add('oculto');
+  construirRed();
+  actualizarLista();
+  actualizarFicha();
+}
+
+/** Cuenta las relaciones del habitante a partir de sus arcos salientes y entrantes. */
+function resumenRelaciones(id) {
+  const res = { confiaEn: 0, confianEnEl: 0, alianzas: 0, enemigos: new Set(), conectados: new Set() };
+  for (const r of grafo.relaciones) {
+    if (r.a !== id && r.b !== id) continue;
+    const otro = r.a === id ? r.b : r.a;
+    const sale = r.a === id ? r.tipoAB : r.tipoBA;
+    const entra = r.a === id ? r.tipoBA : r.tipoAB;
+    if (sale === 'AMISTAD') res.confiaEn++;
+    if (entra === 'AMISTAD') res.confianEnEl++;
+    if (sale === 'AMISTAD' && entra === 'AMISTAD') res.alianzas++;
+    if (sale === 'ENEMISTAD' || entra === 'ENEMISTAD') res.enemigos.add(otro);
+    if (sale !== 'DESCONOCIDO' || entra !== 'DESCONOCIDO') res.conectados.add(otro);
+  }
+  return res;
+}
+
+function renderMenu() {
+  const menu = $('menu-hab');
+  const s = seleccionado && ficha(seleccionado);
+  if (!s) { menu.classList.add('oculto'); return; }
+  const info = ROL_INFO[s.rol];
+  const r = resumenRelaciones(s.id);
+  const boton = (modo, texto) => `<button class="opc ${modoRelacion === modo ? 'activa' : ''}" onclick="verRelaciones('${modo}')">${texto}</button>`;
+  menu.innerHTML = `
+    <div class="menu-cab">
+      <div class="cara">${caraHtml(s.id, 26)}</div>
+      <div style="min-width:0; flex:1">
+        <div style="color:${info.color}; font-size:15px">${esc(nombre(s.id))}</div>
+        <div class="sub">${info.icono} ${info.etiqueta} · paranoia <b style="color:${colorParanoia(s.paranoia)}">${s.paranoia}</b></div>
+      </div>
+      <button class="cerrar" onclick="cerrarMenu()" title="Cerrar (Esc)">✕</button>
+    </div>
+    <div class="menu-sub">🔗 Ver relaciones</div>
+    ${boton('salientes', `→ Confía en <b>${r.confiaEn}</b>`)}
+    ${boton('entrantes', `← Confían en él/ella <b>${r.confianEnEl}</b>`)}
+    ${boton('todas', `⟷ Todas <b>${r.conectados.size}</b>`)}
+    ${modoRelacion ? `<div class="menu-resumen">💚 ${r.alianzas} alianza(s) · ⚔ ${r.enemigos.size} enemigo(s)<br><span class="sub">El número en cada flecha es la afinidad (peso del arco).</span></div>` : ''}
+    <div class="menu-acciones">
+      <button class="opc" onclick="cambiarPestaña('habitante')">👤 Ficha</button>
+      <button class="opc" onclick="cambiarPestaña('habitante'); reclutar(${s.id})">🤝 Reclutar</button>
+      <button class="opc" onclick="sosDesde(${s.id})">📡 SOS</button>
+    </div>`;
+  menu.classList.remove('oculto');
+  posicionarMenu();
+}
+
+function verRelaciones(modo) {
+  modoRelacion = modoRelacion === modo ? null : modo;
+  if (modoRelacion && verRed) alternarRed();
+  construirRed();
+  renderMenu();
+  if (modoRelacion && seleccionado) pulsoRadar(seleccionado, '#5be36b');
+}
+
+/** Coloca el menú junto al habitante (se llama en cada cuadro porque el personaje camina). */
+function posicionarMenu() {
+  const menu = $('menu-hab');
+  if (!seleccionado || menu.classList.contains('oculto')) return;
+  const e = ents.get(seleccionado);
+  const mapa = $('mapa');
+  const ctm = mapa.getScreenCTM();
+  if (!e || !ctm) return;
+  const pt = mapa.createSVGPoint();
+  pt.x = e.x; pt.y = e.y - 40;
+  const p = pt.matrixTransform(ctm);
+  const caja = $('mapa-cont').getBoundingClientRect();
+  const w = menu.offsetWidth, h = menu.offsetHeight;
+  if (modoRelacion) {
+    // Mientras se miran las relaciones, el menú se aparta a la esquina para no tapar flechas
+    menu.style.transform = `translate(${Math.round(caja.width - w - 10)}px, 10px)`;
+    return;
+  }
+  let x = p.x - caja.left + 34;
+  if (x + w > caja.width - 8) x = p.x - caja.left - w - 34;
+  let y = p.y - caja.top - h / 2;
+  y = Math.max(8, Math.min(caja.height - h - 8, y));
+  x = Math.max(8, x);
+  menu.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+}
+
+function actualizarFicha() {
+  const cont = $('ficha');
+  if (!seleccionado || !juego || !ficha(seleccionado)) {
+    cont.innerHTML = `<h3>Ficha del habitante</h3><p class="nota">Haz clic en un habitante del mapa o de la lista.</p>`;
+    return;
+  }
+  const u = usuario(seleccionado), s = ficha(seleccionado);
+  const salientes = [], entrantes = [];
+  for (const r of grafo.relaciones) {
+    if (r.a === u.id) { salientes.push([r.b, r.tipoAB, r.pesoAB]); entrantes.push([r.b, r.tipoBA, r.pesoBA]); }
+    if (r.b === u.id) { salientes.push([r.a, r.tipoBA, r.pesoBA]); entrantes.push([r.a, r.tipoAB, r.pesoAB]); }
+  }
+  const fila = ([id, tipo, peso]) => tipo === 'DESCONOCIDO' ? '' :
+    `<div>${chip(id)}<span style="color:${tipo === 'AMISTAD' ? 'var(--verde)' : 'var(--rojo)'}">${tipo === 'AMISTAD' ? '🤝 ' + peso : '⚔'}</span></div>`;
+  const perfil = [u.carrera, u.semestre ? u.semestre + '° sem.' : '', u.edad ? u.edad + ' años' : ''].filter(Boolean).join(' · ');
+  const opciones = Object.entries(ROL_INFO).map(([k, v]) => `<option value="${k}" ${k === s.rol ? 'selected' : ''}>${v.icono} ${v.etiqueta}</option>`).join('');
+  const etiquetas = [];
+  if (juego.lider === s.id) etiquetas.push('<span class="insignia" style="background:#ffd54a;color:#0c1612">LÍDER</span>');
+  if (juego.liderMoral === s.id) etiquetas.push('<span class="insignia" style="border:1px solid #ffd54a;color:#ffd54a">👑 Líder moral</span>');
+  if (juego.puente === s.id) etiquetas.push('<span class="insignia" style="border:1px solid #59c2e6;color:#59c2e6">🔗 Puente</span>');
+  cont.innerHTML = `
+    <div class="fila" style="align-items:flex-start; gap:12px; margin-bottom:10px">
+      <div class="eslabon final" style="width:auto"><div class="circ" style="width:64px;height:64px">${caraHtml(u.id, 50)}</div></div>
+      <div style="min-width:0">
+        <div style="font-size:22px; color:${ROL_INFO[s.rol].color}">${esc(u.nombre)}</div>
+        <div class="nota" style="margin:2px 0 4px">Estudiante${perfil ? ' · ' + esc(perfil) : ''}<br>Vértice #${u.id} · en ${esc(SALAS[s.sala].titulo)}</div>
+        <div>${etiquetas.join(' ')}</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div><label class="etq">Rol</label><select class="campo" onchange="cambiarRol(${u.id}, this.value)">${opciones}</select></div>
+      <div><label class="etq">Paranoia <b style="color:${colorParanoia(s.paranoia)}">${s.paranoia}</b></label>
+        <input type="range" min="0" max="100" value="${s.paranoia}" style="width:100%; accent-color:${colorParanoia(s.paranoia)}" onchange="cambiarParanoia(${u.id}, this.value)" /></div>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <div><label class="etq">→ Confía en</label><div class="lista-rel">${salientes.map(fila).join('') || '<span class="sub">—</span>'}</div></div>
+      <div><label class="etq">← Confían en él/ella</label><div class="lista-rel">${entrantes.map(fila).join('') || '<span class="sub">—</span>'}</div></div>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <button class="btn btn-verde" onclick="reclutar(${u.id})">🤝 Reclutar</button>
+      <button class="btn btn-azul" onclick="sosDesde(${u.id})">📡 SOS desde aquí</button>
+    </div>
+    <div id="res-reclutar" class="resultado" data-vacio="Reclutar sugiere amigos de sus amigos."></div>`;
+}
+
+function cambiarRol(id, rol) {
+  return accion(async () => {
+    await api('PUT', '/api/refugio/sobrevivientes/' + id, { rol });
+    registrar('MANDO', `${nombre(id)} ahora es ${ROL_INFO[rol].etiqueta.toLowerCase()}.`);
+    await recargar(true);
+  });
+}
+function cambiarParanoia(id, valor) {
+  return accion(async () => { await api('PUT', '/api/refugio/sobrevivientes/' + id, { paranoia: Number(valor) }); await recargar(false); });
+}
+function sosDesde(id) {
+  $('sos-origen').value = id;
+  lanzarSOS(id, $('sos-rol').value);
+}
+function reclutar(id) {
+  return accion(async () => {
+    const r = await api('GET', '/api/sugerencias?id=' + id);
+    limpiarMarcas();
+    marcar([id], '#5be36b');
+    marcar(r.sugerencias.map((x) => x.id), '#ffd54a');
+    r.sugerencias.forEach((x) => burbuja(x.id, '?', '#ffd54a'));
+    $('res-reclutar').innerHTML = r.sugerencias.length
+      ? r.sugerencias.map((x) => `<div class="fila" style="justify-content:space-between; padding:3px 0">
+          <span>${chip(x.id)} <span class="sub">${x.enComun} en común</span></span>
+          <button class="btn btn-mini btn-verde" onclick="presentar(${id}, ${x.id})">Presentar</button></div>`).join('')
+      : '<span class="sub">Nadie que sugerir: sus amigos no tienen otros amigos nuevos.</span>';
+  });
+}
+function presentar(a, b) {
+  return accion(async () => {
+    if (arcos.has(a + '>' + b)) await api('PUT', '/api/relaciones', { origen: a, destino: b, tipo: 'AMISTAD' });
+    else await api('POST', '/api/relaciones', { origen: a, destino: b, tipo: 'AMISTAD', peso: 3 });
+    registrar('CONFIANZA', `${nombre(a)} empieza a confiar en ${nombre(b)} (presentados por amigos en común).`);
+    await recargar(false);
+    rayo(a, b, '#5be36b');
+    burbuja(a, '🤝', '#5be36b');
+    reclutar(a);
+  });
+}
+
+// ================= Gestión =================
+function nuevaPartida(escenario, semilla) {
+  return accion(async () => {
+    if (ocupado) throw new Error('Espera a que termine el día');
+    if (escenario) {
+      const datos = await api('GET', '/api/ejemplos/' + escenario);
+      await api('POST', '/api/cargar', JSON.stringify(datos));
+    }
+    const r = await api('POST', '/api/refugio/reiniciar', { semilla: Number.isFinite(semilla) ? semilla : 2026 });
+    seleccionado = null;
+    for (const e of ents.values()) e.g.remove();
+    ents.clear();
+    limpiarMarcas();
+    $('bitacora').innerHTML = '';
+    await recargar(false);
+    registrar('SISTEMA', `Compuertas selladas. ${grafo.usuarios.length} estudiantes dentro del refugio.`);
+    for (const ev of r.eventos) registrar(ev.tipo, ev.texto);
+    cerrarArranque();
+    avisoCentro('REFUGIO AP-4', 'Día 1. Que la confianza los mantenga con vida.', '#5be36b', 2200);
+  });
+}
+function agregarHabitante(ev) {
+  ev.preventDefault();
+  return accion(async () => {
+    const cuerpo = { nombre: $('nuevo-nombre').value.trim() };
+    if ($('nuevo-carrera').value.trim()) cuerpo.carrera = $('nuevo-carrera').value.trim();
+    if ($('nuevo-semestre').value) cuerpo.semestre = Number($('nuevo-semestre').value);
+    const r = await api('POST', '/api/usuarios', cuerpo);
+    ev.target.reset();
+    await recargar(false);
+    registrar('SISTEMA', `${nombre(r.idCreado)} llega al refugio como ${ROL_INFO[ficha(r.idCreado).rol].etiqueta.toLowerCase()}.`);
+    burbuja(r.idCreado, '👋', '#5be36b');
+  });
+}
+function expulsarHabitante() {
+  return accion(async () => {
+    const id = Number($('sel-expulsar').value);
+    if (!id) return;
+    const n = nombre(id);
+    if (!confirm(`¿Expulsar a ${n} del refugio? Se borran también todas sus relaciones.`)) return;
+    await api('DELETE', '/api/usuarios/' + id);
+    const r = await recargar(false);
+    registrar('ALERTA', `${n} fue expulsado del refugio.`);
+    for (const ev of r.eventos || []) registrar(ev.tipo, ev.texto);
+  });
+}
+function aplicarRelacion() {
+  return accion(async () => {
+    const origen = Number($('rel-origen').value), destino = Number($('rel-destino').value), tipo = $('rel-tipo').value;
+    if (origen === destino) throw new Error('Elige dos habitantes distintos');
+    if (arcos.has(origen + '>' + destino)) {
+      if (arcos.get(origen + '>' + destino) === tipo) throw new Error('Ese arco ya es de ese tipo');
+      await api('PUT', '/api/relaciones', { origen, destino, tipo });
+    } else {
+      await api('POST', '/api/relaciones', { origen, destino, tipo, peso: 3 });
+    }
+    await recargar(false);
+    rayo(origen, destino, tipo === 'ENEMISTAD' ? '#e5484d' : '#5be36b');
+    registrar(tipo === 'ENEMISTAD' ? 'CONFLICTO' : 'CONFIANZA', `Arco ${nombre(origen)} → ${nombre(destino)}: ${tipo.toLowerCase()}.`);
+  });
+}
+function romperRelacion() {
+  return accion(async () => {
+    const a = Number($('rel-origen').value), b = Number($('rel-destino').value);
+    await api('DELETE', `/api/relaciones?a=${a}&b=${b}`);
+    await recargar(false);
+    registrar('SISTEMA', `Se borró la relación entre ${nombre(a)} y ${nombre(b)} (los dos arcos).`);
+  });
+}
+
+// ================= Navegación =================
+function cambiarPestaña(nombreTab) {
+  for (const t of ['analisis', 'habitante', 'gestion', 'bitacora']) $('tab-' + t).classList.toggle('oculto', t !== nombreTab);
+  document.querySelectorAll('.pestaña').forEach((b) => b.classList.toggle('activa', b.dataset.tab === nombreTab));
+}
+function abrirManual() { $('modal-manual').classList.remove('oculto'); }
+function cerrarManual() { $('modal-manual').classList.add('oculto'); }
+function cerrarArranque() { $('arranque').classList.add('fuera'); bootCancelado = true; }
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches('input, select, textarea')) return;
+  if (e.key === 'Escape') { cerrarManual(); if (seleccionado) cerrarMenu(); }
+  if (!$('arranque').classList.contains('fuera')) return;
+  if (e.code === 'Space') { e.preventDefault(); siguienteTurno(); }
+  if (e.key === 'p' || e.key === 'P') alternarAuto();
+  if (e.key === 'r' || e.key === 'R') alternarRed();
+});
+$('mapa').addEventListener('click', () => { if (seleccionado) cerrarMenu(); });
+window.addEventListener('resize', posicionarMenu);
+
+// ================= Arranque =================
+let bootCancelado = false;
+const LINEAS_BOOT = [
+  'REFUGIO AP-4 · SISTEMA DE SOPORTE VITAL v4.0',
+  '> Verificando compuertas ................ OK',
+  '> Purificador de aire ................... OK',
+  '> Cargando registro de habitantes (vértices) ... OK',
+  '> Reconstruyendo red de confianza (grafo dirigido, listas de adyacencia) ... OK',
+  '!ADVERTENCIA: recursos limitados. La supervivencia depende de la confianza.'
+];
+async function secuenciaArranque() {
+  const cont = $('lineas-boot');
+  for (const linea of LINEAS_BOOT) {
+    if (bootCancelado) break;
+    const div = document.createElement('div');
+    if (linea.startsWith('!')) div.className = 'adv';
+    cont.appendChild(div);
+    const texto = linea.replace(/^!/, '');
+    for (let i = 0; i <= texto.length; i += 2) {
+      if (bootCancelado) { div.textContent = texto; break; }
+      div.innerHTML = esc(texto.slice(0, i)) + '<span class="cursor"></span>';
+      await esperar(9);
+    }
+    div.textContent = texto;
+    await esperar(bootCancelado ? 0 : 120);
+  }
+  $('portada').classList.remove('oculto');
+}
+$('arranque').addEventListener('click', (e) => { if (!e.target.closest('button')) bootCancelado = true; });
+
+async function iniciar() {
+  try {
+    verRed = localStorage.getItem('refugio-red-todas') === '1';
+    velocidad = Number(localStorage.getItem('refugio-velocidad')) || 1;
+  } catch (e) { /* sin almacenamiento */ }
+  etiquetaRed();
+  $('sel-velocidad').value = String(velocidad);
+  if (!$('sel-velocidad').value) { velocidad = 1; $('sel-velocidad').value = '1'; }
+  cambiarPestaña('analisis');
+  dibujarEscenario();
+  requestAnimationFrame(tick);
+  try {
+    await recargar(false);
+  } catch (e) {
+    aviso('No se pudo conectar con el motor Java: ' + e.message, true);
+  }
+  const hayRed = grafo.usuarios.length > 0;
+  $('btn-boot-continuar').classList.toggle('oculto', !hayRed);
+  if (hayRed) registrar('SISTEMA', `Conectado al motor Java. ${grafo.usuarios.length} habitantes en la red actual.`, false);
+  if (location.hash === '#demo') { $('arranque').classList.add('fuera'); nuevaPartida('estudiantes', 2026); return; }
+  if (location.hash === '#app') { cerrarArranque(); return; }
+  secuenciaArranque();
+}
+// Las fuentes cambian el ancho de los textos: redibuja el escenario cuando carguen
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { dibujarEscenario(); refrescarAspecto(); actualizarHUD(); });
+iniciar();
+</script>
+</body>
+</html>

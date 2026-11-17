@@ -1,0 +1,18 @@
+{
+  "usuarios": [
+    {"id": 1, "nombre": "Juan", "carrera": "Software", "semestre": 1, "edad": 18, "correo": "juan@uni.edu", "x": 440, "y": 270},
+    {"id": 2, "nombre": "Lucía", "carrera": "Telecomunicaciones", "semestre": 4, "edad": 20, "correo": "lucia@uni.edu", "x": 225, "y": 270},
+    {"id": 3, "nombre": "Andrés", "carrera": "Industrial", "semestre": 7, "edad": 22, "correo": "andres@uni.edu", "x": 655, "y": 215},
+    {"id": 4, "nombre": "Sofía", "carrera": "Diseño", "semestre": 2, "edad": 18, "correo": "sofia@uni.edu", "x": 245, "y": 115},
+    {"id": 5, "nombre": "Mateo", "carrera": "Software", "semestre": 5, "edad": 20, "correo": "mateo@uni.edu", "x": 465, "y": 435},
+    {"id": 6, "nombre": "Valeria", "carrera": "Telecomunicaciones", "semestre": 8, "edad": 22, "correo": "valeria@uni.edu", "x": 705, "y": 95}
+  ],
+  "relaciones": [
+    {"a": 1, "b": 2, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD"},
+    {"a": 1, "b": 3, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD"},
+    {"a": 2, "b": 3, "tipoAB": "AMISTAD", "tipoBA": "DESCONOCIDO"},
+    {"a": 4, "b": 1, "tipoAB": "AMISTAD", "tipoBA": "DESCONOCIDO"},
+    {"a": 5, "b": 1, "tipoAB": "AMISTAD", "tipoBA": "ENEMISTAD"},
+    {"a": 6, "b": 3, "tipoAB": "AMISTAD", "tipoBA": "DESCONOCIDO", "pesoAB": 2.0}
+  ]
+}

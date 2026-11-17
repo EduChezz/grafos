@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexo · Red de amistades estudiantiles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas: #F4F6FA;
+      --surface: #FFFFFF;
+      --ink-main: #0F172A;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--ink-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+    }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+    .soft-card {
+      background: var(--surface);
+      border-radius: 22px;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.02);
+    }
+    .btn-tap {
+      border-radius: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .btn-tap:hover:not(:disabled) { transform: translateY(-1.5px); }
+    .btn-tap:active:not(:disabled) { transform: scale(0.96); }
+    .campo {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.75rem;
+      background: #F8FAFC;
+      border-radius: 0.75rem;
+      border: 1px solid #E2E8F0;
+    }
+    .campo:focus { outline: none; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+    .graph-grid-bg {
+      background-color: #FAFBFD;
+      background-image: radial-gradient(circle at 1px 1px, #CBD5E1 1.25px, transparent 0);
+      background-size: 26px 26px;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-pop-in { animation: popIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+    /* Grafo */
+    @keyframes flujo { to { stroke-dashoffset: -17; } }
+    .arco-flujo { stroke-dasharray: 10 7; animation: flujo 0.9s linear infinite; }
+    @keyframes pulso {
+      from { transform: scale(1); opacity: 0.9; }
+      to { transform: scale(1.5); opacity: 0; }
+    }
+    .pulso { transform-box: fill-box; transform-origin: center; animation: pulso 0.9s ease-out forwards; pointer-events: none; }
+    @keyframes nodoEntrada {
+      from { transform: scale(0.2); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .nodo-nuevo { transform-box: fill-box; transform-origin: center; animation: nodoEntrada 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    .barra-densidad { transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+
+    /* Pantalla de inicio */
+    .splash-bg {
+      background:
+        radial-gradient(1100px 650px at 15% 10%, rgba(99, 102, 241, 0.55) 0%, transparent 60%),
+        radial-gradient(900px 600px at 95% 95%, rgba(236, 72, 153, 0.40) 0%, transparent 55%),
+        radial-gradient(700px 500px at 80% 10%, rgba(16, 185, 129, 0.25) 0%, transparent 60%),
+        #0B1020;
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .splash-salida { opacity: 0; transform: scale(1.04); pointer-events: none; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    .constelacion { transform-origin: 600px 400px; animation: girar 160s linear infinite; }
+    @keyframes titilar {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 1; }
+    }
+    .estrella { animation: titilar 3.2s ease-in-out infinite; }
+    @keyframes latido {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.6); }
+      50% { transform: scale(1.06); box-shadow: 0 0 0 18px rgba(129, 140, 248, 0); }
+    }
+    .logo-latido { animation: latido 2.4s ease-in-out infinite; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.15); border-radius: 99px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- PANTALLA DE INICIO -->
+  <div id="splash" class="splash-bg fixed inset-0 z-[60] flex items-center justify-center p-4 overflow-hidden">
+    <svg class="absolute inset-0 w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <g id="constelacion" class="constelacion"></g>
+    </svg>
+    <div class="relative max-w-2xl w-full text-center text-white animate-pop-in">
+      <div class="logo-latido mx-auto w-20 h-20 rounded-[28px] bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center mb-6">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/>
+          <path stroke-linecap="round" d="M8.3 7l7.4 0M7.4 8.1l3.3 7.7M16.6 9.1l-3.3 6.7"/>
+        </svg>
+      </div>
+      <h1 class="text-5xl sm:text-6xl font-extrabold tracking-tight">Nexo</h1>
+      <p class="mt-3 text-lg sm:text-xl text-indigo-100/90 font-medium">Descubre cómo se conectan los estudiantes de tu clase</p>
+      <p class="mt-2 text-sm text-slate-300/80 max-w-lg mx-auto">Amistades que no siempre son recíprocas, comunidades que se forman solas y los compañeros que unen a todo el curso.</p>
+
+      <div class="mt-7 flex flex-wrap justify-center gap-2 text-xs font-semibold">
+        <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur">🧭 BFS · DFS animados</span>
+        <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur">💞 Camino de mayor afinidad</span>
+        <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur">🫂 Comunidades y su fuerza</span>
+        <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur">🏆 Ranking de influencia</span>
+      </div>
+
+      <div class="mt-9 flex flex-col sm:flex-row justify-center gap-3">
+        <button onclick="iniciarConEjemplo()" class="btn-tap px-6 py-3.5 text-sm bg-white text-slate-900 hover:bg-indigo-50 shadow-xl shadow-indigo-500/30">
+          ✨ Explorar con una clase de ejemplo
+        </button>
+        <button onclick="cerrarSplash()" class="btn-tap px-6 py-3.5 text-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white">
+          Empezar con mi red
+        </button>
+      </div>
+      <p class="mt-6 text-[11px] text-slate-400">Motor en Java · grafo dirigido con listas de adyacencia</p>
+    </div>
+  </div>
+
+  <header class="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/70">
+    <div class="max-w-[1560px] mx-auto px-4 sm:px-8 h-16 flex items-center gap-3">
+      <button onclick="abrirSplash()" title="Pantalla de inicio" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-fuchsia-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/>
+          <path stroke-linecap="round" d="M8.3 7l7.4 0M7.4 8.1l3.3 7.7M16.6 9.1l-3.3 6.7"/>
+        </svg>
+      </button>
+      <div class="min-w-0">
+        <h1 class="text-lg font-extrabold tracking-tight text-slate-900 leading-none">Nexo</h1>
+        <p class="text-xs text-slate-500 mt-0.5 truncate">Red de amistades estudiantiles</p>
+      </div>
+      <div class="ml-auto hidden md:flex items-center gap-2 text-xs">
+        <div class="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-700"><strong id="stat-estudiantes" class="font-mono-code">0</strong> estudiantes</div>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700"><strong id="stat-pares" class="font-mono-code">0</strong> relaciones</div>
+        <div class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700"><strong id="stat-mutuas" class="font-mono-code">0</strong> amistades mutuas</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-[1560px] w-full mx-auto p-4 sm:p-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <section class="lg:col-span-4 flex flex-col gap-5 min-w-0">
+
+      <div class="p-1.5 rounded-2xl bg-slate-200/70 grid grid-cols-5 gap-1">
+        <button data-tab="personas" onclick="cambiarPestana('personas')" class="btn-tap py-2 px-1 text-[11px] bg-white text-slate-900 shadow-sm flex flex-col items-center gap-0.5">
+          <span>👥</span><span>Personas</span>
+        </button>
+        <button data-tab="descubrir" onclick="cambiarPestana('descubrir')" class="btn-tap py-2 px-1 text-[11px] text-slate-600 hover:text-slate-900 flex flex-col items-center gap-0.5">
+          <span>✨</span><span>Descubrir</span>
+        </button>
+        <button data-tab="rutas" onclick="cambiarPestana('rutas')" class="btn-tap py-2 px-1 text-[11px] text-slate-600 hover:text-slate-900 flex flex-col items-center gap-0.5">
+          <span>🧭</span><span>Rutas</span>
+        </button>
+        <button data-tab="influencia" onclick="cambiarPestana('influencia')" class="btn-tap py-2 px-1 text-[11px] text-slate-600 hover:text-slate-900 flex flex-col items-center gap-0.5">
+          <span>🏆</span><span>Influencia</span>
+        </button>
+        <button data-tab="datos" onclick="cambiarPestana('datos')" class="btn-tap py-2 px-1 text-[11px] text-slate-600 hover:text-slate-900 flex flex-col items-center gap-0.5">
+          <span>📂</span><span>Datos</span>
+        </button>
+      </div>
+
+      <!-- PESTAÑA PERSONAS -->
+      <div id="panel-personas" class="flex flex-col gap-5">
+
+        <div class="soft-card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">1. Estudiantes</h2>
+              <p class="text-xs text-slate-500">Cada estudiante es un vértice del grafo</p>
+            </div>
+            <span class="text-xs font-mono-code font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600" id="badge-node-count">0 usuarios</span>
+          </div>
+
+          <form onsubmit="agregarUsuario(event)" class="mb-3.5">
+            <div class="flex gap-2">
+              <input id="new-user-name" type="text" placeholder="Nombre" required maxlength="30" class="campo flex-1 !text-sm" />
+              <button type="submit" class="btn-tap bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 text-xs shadow-sm shadow-indigo-500/25 shrink-0">
+                + Agregar
+              </button>
+            </div>
+            <details class="mt-2 group">
+              <summary class="text-[11px] font-semibold text-indigo-600 cursor-pointer select-none list-none flex items-center gap-1">
+                <span class="transition-transform group-open:rotate-90">▸</span> Datos del estudiante (opcional)
+              </summary>
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <input id="new-user-carrera" type="text" placeholder="Carrera" maxlength="40" class="campo col-span-2" />
+                <input id="new-user-semestre" type="number" min="1" max="12" placeholder="Semestre (1-12)" class="campo" />
+                <input id="new-user-edad" type="number" min="1" max="120" placeholder="Edad" class="campo" />
+                <input id="new-user-correo" type="email" placeholder="correo@uni.edu" maxlength="60" class="campo col-span-2" />
+              </div>
+            </details>
+          </form>
+
+          <div class="flex items-center gap-2 pt-3 border-t border-slate-100">
+            <select id="remove-user-select" class="campo flex-1"></select>
+            <button onclick="eliminarUsuario()" class="btn-tap bg-rose-50 hover:bg-rose-100 text-rose-600 px-3.5 py-2 text-xs shrink-0">
+              Eliminar
+            </button>
+          </div>
+        </div>
+
+        <div class="soft-card p-5">
+          <div class="mb-3.5">
+            <h2 class="text-base font-bold text-slate-900">2. Relaciones</h2>
+            <p class="text-xs text-slate-500">Arcos dirigidos: cada sentido tiene su propio tipo y afinidad</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Origen</label>
+              <select id="edge-source" class="campo font-medium"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Destino</label>
+              <select id="edge-target" class="campo font-medium"></select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tipo (sentido origen → destino)</label>
+            <select id="edge-type" class="campo font-medium"></select>
+          </div>
+
+          <div class="mb-3.5">
+            <label class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
+              <span>Afinidad (peso del arco)</span>
+              <span class="font-mono-code text-indigo-600"><span id="edge-peso-valor">3</span> / 10</span>
+            </label>
+            <input id="edge-peso" type="range" min="1" max="10" step="1" value="3" class="w-full accent-indigo-600"
+              oninput="$('edge-peso-valor').textContent = this.value" />
+            <div class="flex justify-between text-[10px] text-slate-400"><span>conocido</span><span>mejor amigo</span></div>
+          </div>
+
+          <p class="text-[11px] text-slate-500 mb-3.5 leading-relaxed">
+            <strong>Crear</strong> deja el arco de vuelta como Desconocido.
+            <strong>Tipo</strong> y <strong>Afinidad</strong> cambian solo el sentido origen → destino.
+            <strong>Eliminar</strong> borra los dos sentidos.
+          </p>
+
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="crearRelacion()" class="btn-tap col-span-3 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-3 text-xs shadow-sm shadow-emerald-500/20">
+              Crear relación
+            </button>
+            <button onclick="cambiarTipoRelacion()" class="btn-tap bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 px-2 text-xs">
+              Cambiar tipo
+            </button>
+            <button onclick="cambiarAfinidad()" class="btn-tap bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-700 py-2.5 px-2 text-xs">
+              Cambiar afinidad
+            </button>
+            <button onclick="eliminarRelacion()" class="btn-tap bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-2 text-xs">
+              Eliminar par
+            </button>
+          </div>
+        </div>
+
+        <div class="soft-card p-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Listas de adyacencia</h3>
+          <p class="text-[11px] text-slate-500 mb-3">Cada vértice guarda referencias a sus arcos <strong>salientes</strong> (→) y <strong>entrantes</strong> (←). El número es la afinidad.</p>
+          <div id="adjacency-list-view" class="max-h-64 overflow-y-auto space-y-1.5 text-xs"></div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA DESCUBRIR -->
+      <div id="panel-descubrir" class="hidden flex-col gap-5">
+
+        <div class="soft-card p-5">
+          <h2 class="text-base font-bold text-slate-900 mb-1">Comunidades</h2>
+          <p class="text-xs text-slate-500 mb-3.5 leading-relaxed">
+            Grupos unidos por triángulos de amistad mutua. Una comunidad es más <strong>fuerte</strong> cuanto más se acerca a que
+            <em>todos sean amigos de todos</em>: con n miembros hay n·(n−1)/2 parejas posibles y la
+            <strong>densidad</strong> mide cuántas lo son de verdad. El <strong>núcleo</strong> es el grupo más grande donde todos se conocen (clique).
+          </p>
+          <button onclick="detectarComunidades()" class="btn-tap w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-3 text-xs mb-3">
+            Detectar comunidades
+          </button>
+          <div id="resultado-comunidades" class="text-xs space-y-2.5"></div>
+        </div>
+
+        <div class="soft-card p-5">
+          <h2 class="text-base font-bold text-slate-900 mb-1">Sugerir amigos</h2>
+          <p class="text-xs text-slate-500 mb-3.5">Amigos de amigos con los que todavía no hay una opinión definida, ordenados por amigos en común.</p>
+          <div class="flex gap-2 mb-3">
+            <select id="sug-user" class="campo flex-1"></select>
+            <button onclick="sugerirAmigos()" class="btn-tap bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 text-xs shrink-0">
+              Sugerir
+            </button>
+          </div>
+          <div id="resultado-sugerencias" class="text-xs space-y-1.5"></div>
+        </div>
+
+        <div class="soft-card p-5">
+          <h2 class="text-base font-bold text-slate-900 mb-1">Amigos en común</h2>
+          <p class="text-xs text-slate-500 mb-3.5">Estudiantes a los que los dos consideran amigos.</p>
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <select id="anal-a" class="campo"></select>
+            <select id="anal-b" class="campo"></select>
+          </div>
+          <button onclick="buscarEnComun()" class="btn-tap w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-3 text-xs mb-3">
+            Amigos en común
+          </button>
+          <div id="resultado-comun" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs"></div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA RUTAS -->
+      <div id="panel-rutas" class="hidden flex-col gap-5">
+        <div class="soft-card p-5">
+          <h2 class="text-base font-bold text-slate-900 mb-1">Recorridos y caminos</h2>
+          <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+            Solo siguen arcos de Amistad, en el sentido de la flecha.
+            <strong>BFS</strong> avanza nivel por nivel (cola); <strong>DFS</strong> sigue un camino hasta el fondo y deja pendientes los demás (pila).
+            <strong>Menos saltos</strong> usa BFS; <strong>Mayor afinidad</strong> usa Dijkstra con costo 1/afinidad, así prefiere pasar por amigos cercanos.
+          </p>
+
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Punto de partida</label>
+              <select id="trav-start" class="campo"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Destino (caminos)</label>
+              <select id="trav-end" class="campo"></select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <button onclick="recorrer('bfs')" class="btn-tap bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-2 text-xs">▶ BFS (a lo ancho)</button>
+            <button onclick="recorrer('dfs')" class="btn-tap bg-slate-800 hover:bg-slate-900 text-white py-2.5 px-2 text-xs">▶ DFS (en profundidad)</button>
+            <button onclick="buscarCamino('camino')" class="btn-tap bg-rose-600 hover:bg-rose-700 text-white py-2.5 px-2 text-xs">⇢ Menos saltos</button>
+            <button onclick="buscarCamino('camino-afin')" class="btn-tap bg-fuchsia-600 hover:bg-fuchsia-700 text-white py-2.5 px-2 text-xs">💞 Mayor afinidad</button>
+          </div>
+
+          <div class="bg-slate-900 text-slate-100 rounded-2xl p-4 font-mono-code text-xs">
+            <div class="text-[11px] text-slate-400 pb-2 mb-2 border-b border-slate-800">RESULTADO</div>
+            <div id="trav-output" class="space-y-1.5 min-h-[110px] max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA INFLUENCIA -->
+      <div id="panel-influencia" class="hidden flex-col gap-5">
+        <div class="soft-card p-5">
+          <h2 class="text-base font-bold text-slate-900 mb-1">Ranking de influencia</h2>
+          <p class="text-xs text-slate-500 mb-3.5 leading-relaxed">
+            Solo cuenta la Amistad. Se ordena por <strong>intermediación</strong> (cuántos caminos más cortos entre otros pasan por el estudiante: los "puentes"),
+            luego por grado de entrada (cuántos lo eligen como amigo) y luego por ID menor. Se recalcula con cada cambio.
+          </p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-[11px] text-left border-collapse">
+              <thead>
+                <tr class="text-slate-500 border-b border-slate-200">
+                  <th class="py-1.5 pr-2 font-semibold">#</th>
+                  <th class="py-1.5 pr-2 font-semibold">Estudiante</th>
+                  <th class="py-1.5 pr-2 font-semibold text-right">Interm.</th>
+                  <th class="py-1.5 pr-2 font-semibold text-right">Entrada</th>
+                  <th class="py-1.5 pr-2 font-semibold text-right">Salida</th>
+                  <th class="py-1.5 font-semibold text-right">Cent. grado</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-influencia" class="font-mono-code"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA DATOS -->
+      <div id="panel-datos" class="hidden flex-col gap-5">
+
+        <div class="soft-card p-5">
+          <h2 class="text-base font-bold text-slate-900 mb-1">Ejemplos</h2>
+          <p class="text-xs text-slate-500 mb-3.5">Se cargan con el mismo cargador que un archivo.</p>
+          <div class="grid grid-cols-1 gap-2">
+            <button onclick="cargarEjemplo('estudiantes')" class="btn-tap bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-3 text-xs text-left">
+              🎓 Clase completa <span class="opacity-75 font-normal">· 15 estudiantes, 3 comunidades de distinta fuerza</span>
+            </button>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="cargarEjemplo('red-social')" class="btn-tap bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-3 text-xs">Red pequeña</button>
+              <button onclick="cargarEjemplo('comunidades')" class="btn-tap bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-3 text-xs">Comunidades</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="soft-card p-5">
+          <h2 class="text-base font-bold text-slate-900 mb-1">Cargar archivo JSON</h2>
+          <p class="text-xs text-slate-500 mb-3.5">Reemplaza el grafo actual. Si el archivo tiene errores, el grafo actual se conserva.</p>
+          <input id="archivo-json" type="file" accept=".json,application/json"
+            class="block w-full text-xs text-slate-600 mb-3 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-slate-100 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-200" />
+          <button onclick="cargarArchivoSeleccionado()" class="btn-tap w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-3 text-xs">
+            Cargar archivo
+          </button>
+        </div>
+
+        <div class="soft-card p-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Formato</h3>
+          <pre class="font-mono-code text-[11px] text-slate-600 bg-slate-50 rounded-xl p-3 overflow-x-auto">{
+  "usuarios": [
+    { "id": 1, "nombre": "Ana",
+      "carrera": "Software", "semestre": 4,
+      "edad": 20, "correo": "ana@uni.edu",
+      "x": 190, "y": 130 }
+  ],
+  "relaciones": [
+    { "a": 1, "b": 2,
+      "tipoAB": "AMISTAD", "pesoAB": 5,
+      "tipoBA": "DESCONOCIDO" }
+  ]
+}</pre>
+          <p class="text-[11px] text-slate-500 mt-2">Solo son obligatorios id, nombre, a, b y tipoAB. x e y solo los usa esta vista; si faltan, el grafo se organiza solo.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="lg:col-span-8 flex flex-col gap-4 min-w-0 lg:sticky lg:top-20 lg:self-start">
+
+      <div class="soft-card px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div id="legend-tipos" class="flex flex-wrap items-center gap-4 text-xs font-medium"></div>
+
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <div class="px-3 py-1 rounded-full bg-amber-50 text-amber-800 font-medium">
+            🏆 <strong id="stat-influencer">—</strong>
+          </div>
+          <div class="p-1 rounded-xl bg-slate-200/70 grid grid-cols-2 gap-1">
+            <button id="vista-real" onclick="cambiarVista(false)" class="btn-tap px-3 py-1 text-xs bg-white text-slate-900 shadow-sm">Curvas</button>
+            <button id="vista-compacta" onclick="cambiarVista(true)" class="btn-tap px-3 py-1 text-xs text-slate-600 hover:text-slate-900">Compacta</button>
+          </div>
+          <button id="btn-afinidad" onclick="alternarAfinidad()" class="btn-tap bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 text-xs">
+            💞 Afinidad
+          </button>
+          <button onclick="quitarResaltado()" class="btn-tap bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 text-xs">
+            Limpiar
+          </button>
+          <button onclick="ordenarGrafo()" class="btn-tap bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 text-xs">
+            ◯ Círculo
+          </button>
+          <button onclick="organizarPorFuerzas(true)" class="btn-tap bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 text-xs shadow-sm shadow-indigo-500/25">
+            ⚛ Auto-organizar
+          </button>
+        </div>
+      </div>
+
+      <div class="soft-card h-[600px] lg:h-[calc(100vh-13.5rem)] min-h-[520px] flex flex-col relative overflow-hidden">
+
+        <div class="px-5 py-2.5 bg-indigo-50/60 border-b border-indigo-100/80 flex items-center justify-between text-xs text-indigo-900">
+          <span>💡 Haz clic en un estudiante para ver su perfil, lo que opina de otros y lo que opinan de él. Arrastra las tarjetas para moverlas.</span>
+          <button id="btn-reset-focus" onclick="cerrarTarjeta()" class="hidden text-indigo-600 font-bold hover:underline shrink-0 ml-3">
+            Mostrar todos
+          </button>
+        </div>
+
+        <div class="relative flex-1 min-h-0 w-full select-none graph-grid-bg" id="canvas-wrapper">
+          <svg id="graph-svg" class="absolute inset-0 w-full h-full" viewBox="0 0 880 530">
+            <defs>
+              <filter id="card-shadow" x="-25%" y="-25%" width="150%" height="150%">
+                <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.10" />
+              </filter>
+              <filter id="brillo" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="3.5" result="desenfoque" />
+                <feMerge><feMergeNode in="desenfoque" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+            <defs id="defs-flechas"></defs>
+
+            <rect width="880" height="530" fill="transparent" onclick="cerrarTarjeta()"></rect>
+
+            <g id="layer-edges"></g>
+            <g id="layer-fx" style="pointer-events: none"></g>
+            <g id="layer-nodes"></g>
+            <g id="layer-pulsos" style="pointer-events: none"></g>
+          </svg>
+
+          <div id="vacio-grafo" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
+            <div class="text-4xl mb-2">🕸️</div>
+            <p class="text-sm font-bold text-slate-700">Tu red está vacía</p>
+            <p class="text-xs text-slate-500 mt-1">Agrega estudiantes a la izquierda o carga la clase de ejemplo en la pestaña Datos.</p>
+          </div>
+
+          <div id="user-social-popover" class="hidden animate-pop-in absolute bottom-4 left-4 right-4 sm:right-auto sm:w-[380px] bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl shadow-2xl p-4 z-20">
+            <div class="flex items-start justify-between pb-3 mb-3 border-b border-slate-100 gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div id="pop-avatar" class="min-w-11 h-11 px-1 rounded-2xl bg-gradient-to-br from-indigo-600 to-fuchsia-500 text-white font-bold text-sm flex items-center justify-center shadow-sm"></div>
+                <div class="min-w-0">
+                  <h4 id="pop-name" class="font-bold text-slate-900 text-base leading-tight truncate"></h4>
+                  <div id="pop-perfil" class="text-[11px] text-slate-500 leading-snug"></div>
+                </div>
+              </div>
+              <div class="flex gap-1 shrink-0">
+                <button onclick="alternarEdicionPerfil()" title="Editar datos" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs">✎</button>
+                <button onclick="cerrarTarjeta()" title="Cerrar" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">✕</button>
+              </div>
+            </div>
+
+            <form id="pop-editar" onsubmit="guardarPerfil(event)" class="hidden grid-cols-2 gap-2 mb-3">
+              <input id="edit-carrera" type="text" placeholder="Carrera" maxlength="40" class="campo col-span-2" />
+              <input id="edit-semestre" type="number" min="1" max="12" placeholder="Semestre" class="campo" />
+              <input id="edit-edad" type="number" min="1" max="120" placeholder="Edad" class="campo" />
+              <input id="edit-correo" type="email" placeholder="correo@uni.edu" maxlength="60" class="campo col-span-2" />
+              <button type="submit" class="btn-tap col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 text-xs">Guardar datos</button>
+            </form>
+
+            <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl mb-3">
+              <button id="pop-tab-salientes" onclick="cambiarPestanaTarjeta('salientes')" class="py-1.5 px-2 rounded-lg text-xs transition-all">
+                → Opina de otros (<span id="count-out">0</span>)
+              </button>
+              <button id="pop-tab-entrantes" onclick="cambiarPestanaTarjeta('entrantes')" class="py-1.5 px-2 rounded-lg text-xs transition-all">
+                ← Opinan de él (<span id="count-in">0</span>)
+              </button>
+            </div>
+
+            <div id="pop-list-content" class="max-h-36 overflow-y-auto space-y-1.5 text-xs pr-1"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white px-4 py-2.5 rounded-full shadow-xl text-xs font-medium flex items-center gap-2 max-w-md">
+    <span id="toast-dot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+    <span id="toast-msg"></span>
+  </div>
+
+  <script>
+    const COLORES = { AMISTAD: '#10B981', ENEMISTAD: '#F43F5E', DESCONOCIDO: '#94A3B8' };
+    const COLOR_DEFECTO = '#8B5CF6';
+    const COLOR_RESALTE = '#F59E0B';
+    const COLORES_COMUNIDAD = ['#4F46E5', '#F59E0B', '#0EA5E9', '#EC4899', '#14B8A6', '#8B5CF6'];
+    const COLORES_FUERZA = { COMPLETA: '#059669', FUERTE: '#4F46E5', MODERADA: '#D97706', DEBIL: '#E11D48' };
+    const COLORES_RECORRIDO = { bfs: '#6366F1', dfs: '#0F172A', camino: '#E11D48', 'camino-afin': '#C026D3' };
+    const MEDIO_ANCHO = 52;
+    const MEDIO_ALTO = 36;
+    const CENTRO = { x: 440, y: 265 };
+
+    const VACIOS = {
+      'resultado-comun': '<span class="text-slate-400">Elige dos estudiantes y pulsa "Amigos en común".</span>',
+      'resultado-sugerencias': '<span class="text-slate-400">Elige un estudiante y pulsa "Sugerir".</span>',
+      'resultado-comunidades': '<span class="text-slate-400">Pulsa "Detectar comunidades".</span>',
+      'trav-output': '<span class="text-slate-400">Elige un estudiante y pulsa un recorrido o un camino.</span>'
+    };
+
+    let estado = { usuarios: [], relaciones: [], tipos: [], siguienteId: 1, pesoMaximo: 10 };
+    let posiciones = new Map();
+    let usuarioActivo = null;
+    let pestanaTarjeta = 'salientes';
+    let arrastrando = null;
+    let huboArrastre = false;
+    let vistaCompacta = false;
+    let mostrarAfinidad = false;
+    let nodosNuevos = new Set();
+
+    let resaltadoNodos = new Set();
+    let resaltadoArcos = new Set();
+    let ordenVisita = new Map();
+    let comunidadesVista = null;
+    let tokenAnimacion = 0;
+    let tokenLayout = 0;
+    let tokenInfluencia = 0;
+    let rankingActual = [];
+
+    const $ = (id) => document.getElementById(id);
+    const svgEl = $('graph-svg');
+    const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    // Utilidades
+
+    function esc(texto) {
+      return String(texto).replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    function colorDe(tipo) {
+      return COLORES[tipo] || COLOR_DEFECTO;
+    }
+
+    function colorComunidad(id) {
+      return COLORES_COMUNIDAD[(id - 1) % COLORES_COMUNIDAD.length];
+    }
+
+    function etiquetaDe(tipo) {
+      const encontrado = estado.tipos.find((t) => t.nombre === tipo);
+      return encontrado ? encontrado.etiqueta : tipo;
+    }
+
+    function usuarioPorId(id) {
+      return estado.usuarios.find((u) => u.id === id);
+    }
+
+    function nombreDe(id) {
+      const usuario = usuarioPorId(id);
+      return usuario ? usuario.nombre : String(id);
+    }
+
+    function iniciales(nombre) {
+      return nombre.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('');
+    }
+
+    function formatoPeso(peso) {
+      return Number.isInteger(peso) ? String(peso) : peso.toFixed(1);
+    }
+
+    function textoPerfil(u) {
+      const partes = [];
+      if (u.carrera) partes.push(esc(u.carrera));
+      if (u.semestre) partes.push(u.semestre + '° semestre');
+      if (u.edad) partes.push(u.edad + ' años');
+      return partes.join(' · ');
+    }
+
+    function valorSelector(id) {
+      const valor = $(id).value;
+      if (!valor) throw new Error('Agrega estudiantes primero');
+      return Number(valor);
+    }
+
+    function mostrarAviso(mensaje, esError = false) {
+      $('toast-msg').textContent = mensaje;
+      $('toast-dot').className = 'w-2 h-2 rounded-full shrink-0 ' + (esError ? 'bg-rose-400' : 'bg-emerald-400');
+      $('toast').classList.remove('hidden');
+      clearTimeout(window._avisoTimer);
+      window._avisoTimer = setTimeout(() => $('toast').classList.add('hidden'), 3500);
+    }
+
+    async function accion(funcion) {
+      try {
+        await funcion();
+      } catch (e) {
+        mostrarAviso(e.message, true);
+      }
+    }
+
+    async function api(metodo, ruta, cuerpo) {
+      const opciones = { method: metodo };
+      if (cuerpo !== undefined) {
+        const esTexto = typeof cuerpo === 'string';
+        opciones.body = esTexto ? cuerpo : JSON.stringify(cuerpo);
+        opciones.headers = { 'Content-Type': esTexto ? 'text/plain; charset=utf-8' : 'application/json' };
+      }
+      const respuesta = await fetch(ruta, opciones);
+      const texto = await respuesta.text();
+      let datos = null;
+      try { datos = JSON.parse(texto); } catch (e) { datos = null; }
+      if (!respuesta.ok) {
+        throw new Error((datos && datos.error) || 'Error ' + respuesta.status);
+      }
+      return datos;
+    }
+
+    function tipoArco(origen, destino) {
+      for (const r of estado.relaciones) {
+        if (r.a === origen && r.b === destino) return r.tipoAB;
+        if (r.b === origen && r.a === destino) return r.tipoBA;
+      }
+      return null;
+    }
+
+    // Pantalla de inicio
+
+    function dibujarConstelacion() {
+      const capa = $('constelacion');
+      const puntos = [];
+      for (let i = 0; i < 46; i++) {
+        puntos.push({ x: 40 + Math.random() * 1120, y: 30 + Math.random() * 740 });
+      }
+      puntos.forEach((p, i) => {
+        puntos.slice(i + 1).forEach((q) => {
+          const d = Math.hypot(p.x - q.x, p.y - q.y);
+          if (d < 170) {
+            capa.appendChild(crearSvg('line', {
+              x1: p.x, y1: p.y, x2: q.x, y2: q.y,
+              stroke: '#A5B4FC', 'stroke-opacity': (0.35 * (1 - d / 170)).toFixed(2), 'stroke-width': 1.2
+            }));
+          }
+        });
+      });
+      puntos.forEach((p, i) => {
+        const c = crearSvg('circle', { cx: p.x, cy: p.y, r: 2 + Math.random() * 3.5, fill: i % 5 === 0 ? '#F0ABFC' : '#C7D2FE', class: 'estrella' });
+        c.style.animationDelay = (Math.random() * 3).toFixed(2) + 's';
+        capa.appendChild(c);
+      });
+    }
+
+    function cerrarSplash() {
+      $('splash').classList.add('splash-salida');
+      setTimeout(() => $('splash').classList.add('hidden'), 550);
+    }
+
+    function abrirSplash() {
+      $('splash').classList.remove('hidden');
+      requestAnimationFrame(() => $('splash').classList.remove('splash-salida'));
+    }
+
+    function iniciarConEjemplo() {
+      cerrarSplash();
+      cargarEjemplo('estudiantes', true);
+    }
+
+    // Estado y posiciones
+
+    function aplicarEstado(nuevo, organizar = false) {
+      estado = nuevo;
+      const todosNuevos = sincronizarPosiciones();
+      if (usuarioActivo !== null && !usuarioPorId(usuarioActivo)) usuarioActivo = null;
+      limpiarResultados();
+      actualizarTodo();
+      if (todosNuevos || organizar) organizarPorFuerzas(false);
+    }
+
+    function limitar(p) {
+      return { x: Math.max(60, Math.min(820, p.x)), y: Math.max(48, Math.min(480, p.y)) };
+    }
+
+    function posicionesElipse() {
+      const destinos = new Map();
+      const n = estado.usuarios.length;
+      if (!n) return destinos;
+      const rx = Math.min(330, 150 + n * 18);
+      const ry = Math.min(200, 105 + n * 12);
+      estado.usuarios.forEach((u, i) => {
+        const angulo = (2 * Math.PI * i) / n - Math.PI / 2;
+        destinos.set(u.id, limitar({
+          x: Math.round(CENTRO.x + rx * Math.cos(angulo)),
+          y: Math.round(CENTRO.y + ry * Math.sin(angulo))
+        }));
+      });
+      return destinos;
+    }
+
+    /** Devuelve true si todos los usuarios eran nuevos (se cargó un grafo sin posiciones). */
+    function sincronizarPosiciones() {
+      const ids = new Set(estado.usuarios.map((u) => u.id));
+      for (const id of [...posiciones.keys()]) {
+        if (!ids.has(id)) posiciones.delete(id);
+      }
+      const faltantes = estado.usuarios.filter((u) => !posiciones.has(u.id));
+      for (const [id, p] of posiciones) posiciones.set(id, limitar(p));
+
+      if (faltantes.length > 0 && faltantes.length === estado.usuarios.length) {
+        posicionesElipse().forEach((p, id) => posiciones.set(id, p));
+        return true;
+      }
+      faltantes.forEach((u) => {
+        posiciones.set(u.id, limitar({ x: CENTRO.x + (Math.random() - 0.5) * 260, y: CENTRO.y + (Math.random() - 0.5) * 180 }));
+      });
+      return false;
+    }
+
+    function animarPosiciones(destinos, duracion = 750) {
+      const miToken = ++tokenLayout;
+      const inicio = new Map();
+      destinos.forEach((p, id) => inicio.set(id, posiciones.get(id) || p));
+      const t0 = performance.now();
+      function paso(ahora) {
+        if (miToken !== tokenLayout) return;
+        const t = Math.min(1, (ahora - t0) / duracion);
+        const e = 1 - Math.pow(1 - t, 3);
+        destinos.forEach((p, id) => {
+          const a = inicio.get(id);
+          posiciones.set(id, { x: a.x + (p.x - a.x) * e, y: a.y + (p.y - a.y) * e });
+        });
+        dibujarGrafo();
+        if (t < 1) requestAnimationFrame(paso);
+      }
+      requestAnimationFrame(paso);
+    }
+
+    function ordenarGrafo() {
+      animarPosiciones(posicionesElipse());
+    }
+
+    /**
+     * Distribución por fuerzas (Fruchterman–Reingold): todos los nodos se repelen,
+     * las relaciones actúan como resortes (más fuertes si la amistad es mutua)
+     * y una gravedad suave los mantiene en el centro. Se anima cuadro a cuadro.
+     */
+    function organizarPorFuerzas(conAviso) {
+      const ids = estado.usuarios.map((u) => u.id);
+      if (ids.length < 2) return;
+      const miToken = ++tokenLayout;
+      const K = Math.max(120, Math.min(190, Math.sqrt((760 * 430) / ids.length) * 0.95));
+      const enlaces = estado.relaciones.map((r) => ({
+        a: r.a, b: r.b,
+        fuerza: 0.25 + 0.5 * (r.tipoAB === 'AMISTAD') + 0.5 * (r.tipoBA === 'AMISTAD')
+      }));
+      let temperatura = 55;
+      let cuadro = 0;
+
+      function paso() {
+        if (miToken !== tokenLayout) return;
+        const desp = new Map(ids.map((id) => [id, { x: 0, y: 0 }]));
+
+        for (let i = 0; i < ids.length; i++) {
+          for (let j = i + 1; j < ids.length; j++) {
+            const p = posiciones.get(ids[i]);
+            const q = posiciones.get(ids[j]);
+            let dx = p.x - q.x;
+            let dy = (p.y - q.y) * 1.35;
+            let d = Math.hypot(dx, dy);
+            if (d < 1) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; d = 1; }
+            const f = (K * K) / d;
+            desp.get(ids[i]).x += (dx / d) * f; desp.get(ids[i]).y += (dy / d) * f;
+            desp.get(ids[j]).x -= (dx / d) * f; desp.get(ids[j]).y -= (dy / d) * f;
+          }
+        }
+        for (const e of enlaces) {
+          const p = posiciones.get(e.a);
+          const q = posiciones.get(e.b);
+          if (!p || !q) continue;
+          const dx = p.x - q.x;
+          const dy = p.y - q.y;
+          const d = Math.max(Math.hypot(dx, dy), 1);
+          const f = ((d * d) / K) * e.fuerza;
+          desp.get(e.a).x -= (dx / d) * f; desp.get(e.a).y -= (dy / d) * f;
+          desp.get(e.b).x += (dx / d) * f; desp.get(e.b).y += (dy / d) * f;
+        }
+        for (const id of ids) {
+          const p = posiciones.get(id);
+          const v = desp.get(id);
+          v.x += (CENTRO.x - p.x) * 0.9;
+          v.y += (CENTRO.y - p.y) * 1.4;
+          const largo = Math.max(Math.hypot(v.x, v.y), 0.01);
+          const mover = Math.min(largo, temperatura);
+          posiciones.set(id, limitar({ x: p.x + (v.x / largo) * mover, y: p.y + (v.y / largo) * mover }));
+        }
+
+        temperatura *= 0.955;
+        cuadro++;
+        dibujarGrafo();
+        if (cuadro < 140 && temperatura > 0.4) {
+          requestAnimationFrame(paso);
+        } else if (conAviso) {
+          mostrarAviso('Red organizada por fuerzas');
+        }
+      }
+      requestAnimationFrame(paso);
+    }
+
+    // Vista
+
+    function cambiarVista(compacta) {
+      vistaCompacta = compacta;
+      const botones = { 'vista-real': !compacta, 'vista-compacta': compacta };
+      for (const id in botones) {
+        const activo = botones[id];
+        $(id).classList.toggle('bg-white', activo);
+        $(id).classList.toggle('text-slate-900', activo);
+        $(id).classList.toggle('shadow-sm', activo);
+        $(id).classList.toggle('text-slate-600', !activo);
+      }
+      dibujarGrafo();
+    }
+
+    function alternarAfinidad() {
+      mostrarAfinidad = !mostrarAfinidad;
+      const boton = $('btn-afinidad');
+      boton.classList.toggle('bg-fuchsia-600', mostrarAfinidad);
+      boton.classList.toggle('text-white', mostrarAfinidad);
+      boton.classList.toggle('hover:bg-fuchsia-700', mostrarAfinidad);
+      boton.classList.toggle('bg-slate-100', !mostrarAfinidad);
+      boton.classList.toggle('text-slate-700', !mostrarAfinidad);
+      boton.classList.toggle('hover:bg-slate-200', !mostrarAfinidad);
+      dibujarGrafo();
+    }
+
+    // Resaltado y resultados
+
+    function limpiarResaltado() {
+      tokenAnimacion++;
+      resaltadoNodos = new Set();
+      resaltadoArcos = new Set();
+      ordenVisita = new Map();
+      comunidadesVista = null;
+      $('layer-fx').replaceChildren();
+      $('layer-pulsos').replaceChildren();
+    }
+
+    function restaurarVacios() {
+      for (const id in VACIOS) $(id).innerHTML = VACIOS[id];
+    }
+
+    function limpiarResultados() {
+      limpiarResaltado();
+      restaurarVacios();
+    }
+
+    function quitarResaltado() {
+      limpiarResultados();
+      dibujarGrafo();
+    }
+
+    // Pestañas
+
+    function cambiarPestana(nombre) {
+      document.querySelectorAll('[data-tab]').forEach((boton) => {
+        const activa = boton.dataset.tab === nombre;
+        boton.classList.toggle('bg-white', activa);
+        boton.classList.toggle('text-slate-900', activa);
+        boton.classList.toggle('shadow-sm', activa);
+        boton.classList.toggle('text-slate-600', !activa);
+        const panel = $('panel-' + boton.dataset.tab);
+        panel.classList.toggle('hidden', !activa);
+        panel.classList.toggle('flex', activa);
+      });
+    }
+
+    // Estudiantes
+
+    function leerPerfil(prefijo) {
+      const perfil = {};
+      const carrera = $(prefijo + '-carrera').value.trim();
+      const semestre = $(prefijo + '-semestre').value.trim();
+      const edad = $(prefijo + '-edad').value.trim();
+      const correo = $(prefijo + '-correo').value.trim();
+      if (carrera) perfil.carrera = carrera;
+      if (semestre) perfil.semestre = Number(semestre);
+      if (edad) perfil.edad = Number(edad);
+      if (correo) perfil.correo = correo;
+      return perfil;
+    }
+
+    function agregarUsuario(e) {
+      e.preventDefault();
+      const nombre = $('new-user-name').value.trim();
+      if (!nombre) return;
+      accion(async () => {
+        const respuesta = await api('POST', '/api/usuarios', { nombre, ...leerPerfil('new-user') });
+        ['new-user-name', 'new-user-carrera', 'new-user-semestre', 'new-user-edad', 'new-user-correo']
+          .forEach((id) => { $(id).value = ''; });
+        nodosNuevos.add(respuesta.idCreado);
+        aplicarEstado(respuesta);
+        setTimeout(() => nodosNuevos.delete(respuesta.idCreado), 700);
+        mostrarAviso(nombre + ' se unió a la red (ID ' + respuesta.idCreado + ')');
+      });
+    }
+
+    function eliminarUsuario() {
+      const id = $('remove-user-select').value;
+      if (!id) {
+        mostrarAviso('No hay estudiantes para eliminar', true);
+        return;
+      }
+      const nombre = nombreDe(Number(id));
+      accion(async () => {
+        aplicarEstado(await api('DELETE', '/api/usuarios/' + id));
+        mostrarAviso(nombre + ' eliminado');
+      });
+    }
+
+    function alternarEdicionPerfil() {
+      const formulario = $('pop-editar');
+      const abrir = formulario.classList.contains('hidden');
+      formulario.classList.toggle('hidden', !abrir);
+      formulario.classList.toggle('grid', abrir);
+      const u = usuarioPorId(usuarioActivo);
+      if (abrir && u) {
+        $('edit-carrera').value = u.carrera || '';
+        $('edit-semestre').value = u.semestre || '';
+        $('edit-edad').value = u.edad || '';
+        $('edit-correo').value = u.correo || '';
+      }
+    }
+
+    function guardarPerfil(e) {
+      e.preventDefault();
+      const id = usuarioActivo;
+      if (id === null) return;
+      accion(async () => {
+        aplicarEstado(await api('PUT', '/api/usuarios/' + id, leerPerfil('edit')));
+        $('pop-editar').classList.add('hidden');
+        $('pop-editar').classList.remove('grid');
+        mostrarAviso('Datos de ' + nombreDe(id) + ' actualizados');
+      });
+    }
+
+    // Relaciones
+
+    function leerFormularioRelacion() {
+      const origen = $('edge-source').value;
+      const destino = $('edge-target').value;
+      const tipo = $('edge-type').value;
+      if (!origen || !destino) {
+        throw new Error('Agrega estudiantes primero');
+      }
+      return { origen: Number(origen), destino: Number(destino), tipo, peso: Number($('edge-peso').value) };
+    }
+
+    function crearRelacion() {
+      accion(async () => {
+        const datos = leerFormularioRelacion();
+        aplicarEstado(await api('POST', '/api/relaciones', datos));
+        await animarNuevoArco(datos.origen, datos.destino);
+        mostrarAviso(nombreDe(datos.origen) + ' → ' + nombreDe(datos.destino) + ': ' + etiquetaDe(datos.tipo) + ' (afinidad ' + datos.peso + ')');
+      });
+    }
+
+    function cambiarTipoRelacion() {
+      accion(async () => {
+        const datos = leerFormularioRelacion();
+        aplicarEstado(await api('PUT', '/api/relaciones', { origen: datos.origen, destino: datos.destino, tipo: datos.tipo }));
+        await animarNuevoArco(datos.origen, datos.destino);
+        mostrarAviso(nombreDe(datos.origen) + ' → ' + nombreDe(datos.destino) + ' ahora es ' + etiquetaDe(datos.tipo));
+      });
+    }
+
+    function cambiarAfinidad() {
+      accion(async () => {
+        const datos = leerFormularioRelacion();
+        aplicarEstado(await api('PUT', '/api/relaciones/peso', { origen: datos.origen, destino: datos.destino, peso: datos.peso }));
+        if (!mostrarAfinidad) alternarAfinidad();
+        await animarNuevoArco(datos.origen, datos.destino);
+        mostrarAviso(nombreDe(datos.origen) + ' → ' + nombreDe(datos.destino) + ' ahora tiene afinidad ' + datos.peso);
+      });
+    }
+
+    function eliminarRelacion() {
+      accion(async () => {
+        const datos = leerFormularioRelacion();
+        aplicarEstado(await api('DELETE', '/api/relaciones?a=' + datos.origen + '&b=' + datos.destino));
+        mostrarAviso('Relación eliminada entre ' + nombreDe(datos.origen) + ' y ' + nombreDe(datos.destino));
+      });
+    }
+
+    async function animarNuevoArco(origen, destino) {
+      const miToken = tokenAnimacion;
+      const color = colorDe(tipoArco(origen, destino));
+      await viajar(origen, destino, color, 650, miToken);
+      if (miToken === tokenAnimacion) pulso(destino, color);
+    }
+
+    // Descubrir
+
+    function buscarEnComun() {
+      accion(async () => {
+        const a = valorSelector('anal-a');
+        const b = valorSelector('anal-b');
+        const r = await api('GET', '/api/en-comun?a=' + a + '&b=' + b);
+        limpiarResaltado();
+        r.comunes.forEach((id) => {
+          resaltadoNodos.add(id);
+          resaltadoArcos.add(a + '>' + id);
+          resaltadoArcos.add(b + '>' + id);
+        });
+        $('resultado-comun').innerHTML = r.comunes.length
+          ? '<span class="font-bold text-indigo-700 mr-1">En común:</span>' + r.comunes.map((id) =>
+              `<span class="inline-block bg-white border border-slate-200 rounded-md px-2 py-0.5 mr-1 mb-1 font-semibold">${esc(nombreDe(id))} (${id})</span>`
+            ).join('')
+          : '<span class="text-slate-500">No tienen amigos en común.</span>';
+        dibujarGrafo();
+        r.comunes.forEach((id) => pulso(id, COLOR_RESALTE));
+      });
+    }
+
+    function sugerirAmigos() {
+      accion(async () => {
+        const id = valorSelector('sug-user');
+        const r = await api('GET', '/api/sugerencias?id=' + id);
+        limpiarResaltado();
+        resaltadoNodos.add(id);
+        r.sugerencias.forEach((s) => resaltadoNodos.add(s.id));
+        const maximo = r.sugerencias.length ? r.sugerencias[0].enComun : 1;
+        $('resultado-sugerencias').innerHTML = r.sugerencias.length
+          ? r.sugerencias.map((s) => `
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-200/70">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold text-slate-800">${esc(nombreDe(s.id))} <span class="text-slate-400 font-mono-code">(${s.id})</span></span>
+                  <span class="text-[11px] font-mono-code text-emerald-700">${s.enComun} en común</span>
+                </div>
+                <div class="h-1.5 mt-1.5 rounded-full bg-slate-200 overflow-hidden"><div class="barra-densidad h-full bg-emerald-500 rounded-full" style="width:0%" data-ancho="${(100 * s.enComun / maximo).toFixed(0)}%"></div></div>
+              </div>`).join('')
+          : '<div class="p-3 rounded-xl bg-slate-50 text-slate-500">Sin sugerencias para ' + esc(nombreDe(id)) + '.</div>';
+        animarBarras($('resultado-sugerencias'));
+        dibujarGrafo();
+        r.sugerencias.forEach((s) => pulso(s.id, '#10B981'));
+      });
+    }
+
+    function animarBarras(contenedor) {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        contenedor.querySelectorAll('[data-ancho]').forEach((b) => { b.style.width = b.dataset.ancho; });
+      }));
+    }
+
+    function detectarComunidades() {
+      accion(async () => {
+        const r = await api('GET', '/api/comunidades');
+        limpiarResaltado();
+        comunidadesVista = r.comunidades;
+        dibujarListaComunidades();
+        dibujarGrafo();
+        r.comunidades.forEach((c, k) => {
+          setTimeout(() => c.miembros.forEach((id) => pulso(id, colorComunidad(c.id))), k * 250);
+        });
+        mostrarAviso(r.comunidades.length + ' comunidades detectadas');
+      });
+    }
+
+    function dibujarListaComunidades() {
+      const caja = $('resultado-comunidades');
+      if (!comunidadesVista || !comunidadesVista.length) {
+        caja.innerHTML = '<div class="p-3 rounded-xl bg-slate-50 text-slate-500">No hay comunidades. Se necesitan al menos 3 estudiantes con amistad mutua entre sí.</div>';
+        return;
+      }
+      caja.innerHTML = comunidadesVista.map((c) => {
+        const color = colorComunidad(c.id);
+        const colorFuerza = COLORES_FUERZA[c.fuerza] || '#64748B';
+        const porcentaje = Math.round(c.densidad * 100);
+        const miembros = c.miembros.map((id) => esc(nombreDe(id))).join(', ');
+        const nucleo = c.nucleo.map((id) => esc(nombreDe(id))).join(', ');
+        const triangulos = c.triangulos.map((t) => t.map((id) => esc(nombreDe(id))).join(' – ')).join('; ');
+        return `<div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-3 h-3 rounded-full shrink-0" style="background:${color}"></span>
+              <span class="font-bold text-slate-800">Comunidad ${c.id}</span>
+              <span class="text-slate-400">· ${c.miembros.length} miembros</span>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style="background:${colorFuerza}1A;color:${colorFuerza}">${esc(c.fuerzaEtiqueta)}</span>
+          </div>
+          <div class="text-slate-600 mb-2">${miembros}</div>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+            <span>Densidad: <strong class="text-slate-700">${c.conexiones}</strong> de ${c.posibles} parejas</span>
+            <strong class="font-mono-code" style="color:${colorFuerza}">${porcentaje}%</strong>
+          </div>
+          <div class="h-2 rounded-full bg-slate-200 overflow-hidden mb-2">
+            <div class="barra-densidad h-full rounded-full" style="width:0%;background:${colorFuerza}" data-ancho="${porcentaje}%"></div>
+          </div>
+          <div class="text-[11px] text-slate-600 mb-0.5">🔗 Núcleo (todos con todos): <strong>${nucleo}</strong></div>
+          <div class="text-[11px] text-slate-600 mb-2">💞 Afinidad promedio: <strong class="font-mono-code">${c.afinidadPromedio.toFixed(2)}</strong> / ${formatoPeso(estado.pesoMaximo)}</div>
+          <div class="flex gap-1.5">
+            <button onclick="resaltarComunidad(${c.id})" class="btn-tap bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 px-2.5 py-1 text-[11px]">Resaltar</button>
+            <button onclick="resaltarNucleo(${c.id})" class="btn-tap bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 px-2.5 py-1 text-[11px]">Ver núcleo</button>
+          </div>
+          <details class="mt-2">
+            <summary class="text-[11px] text-slate-400 cursor-pointer select-none">Triángulos (${c.triangulos.length})</summary>
+            <div class="text-[11px] text-slate-500 mt-1">${triangulos}</div>
+          </details>
+        </div>`;
+      }).join('');
+      animarBarras(caja);
+    }
+
+    function resaltarGrupo(ids, conectarTodos, triangulos) {
+      tokenAnimacion++;
+      $('layer-fx').replaceChildren();
+      resaltadoNodos = new Set(ids);
+      resaltadoArcos = new Set();
+      ordenVisita = new Map();
+      if (conectarTodos) {
+        ids.forEach((u) => ids.forEach((v) => {
+          if (u !== v && tipoArco(u, v) === 'AMISTAD') resaltadoArcos.add(u + '>' + v);
+        }));
+      } else {
+        triangulos.forEach((t) => t.forEach((u) => t.forEach((v) => {
+          if (u !== v) resaltadoArcos.add(u + '>' + v);
+        })));
+      }
+      dibujarGrafo();
+      ids.forEach((id) => pulso(id, COLOR_RESALTE));
+    }
+
+    function resaltarComunidad(id) {
+      const c = comunidadesVista && comunidadesVista.find((x) => x.id === id);
+      if (c) resaltarGrupo(c.miembros, false, c.triangulos);
+    }
+
+    function resaltarNucleo(id) {
+      const c = comunidadesVista && comunidadesVista.find((x) => x.id === id);
+      if (c) resaltarGrupo(c.nucleo, true, []);
+    }
+
+    // Rutas
+
+    /**
+     * Reconstruye desde qué nodo se descubrió cada uno, para animar el árbol del recorrido.
+     * BFS: el primer visitado con arco hacia él. DFS (con pila): el último visitado con arco hacia él.
+     */
+    function padresRecorrido(orden, modo) {
+      const padres = new Map();
+      for (let i = 1; i < orden.length; i++) {
+        const v = orden[i];
+        const candidatos = orden.slice(0, i).filter((u) => tipoArco(u, v) === 'AMISTAD');
+        if (candidatos.length) padres.set(v, modo === 'bfs' ? candidatos[0] : candidatos[candidatos.length - 1]);
+      }
+      return padres;
+    }
+
+    async function animarSecuencia(orden, padres, color, alVisitar) {
+      const miToken = tokenAnimacion;
+      for (let i = 0; i < orden.length; i++) {
+        const id = orden[i];
+        const padre = padres.get(id);
+        if (padre !== undefined) {
+          const llego = await viajar(padre, id, color, 480, miToken);
+          if (!llego) return;
+          resaltadoArcos.add(padre + '>' + id);
+        } else {
+          await esperar(180);
+        }
+        if (miToken !== tokenAnimacion) return;
+        resaltadoNodos.add(id);
+        ordenVisita.set(id, i + 1);
+        alVisitar(id, i);
+        dibujarGrafo();
+        pulso(id, color);
+      }
+    }
+
+    function recorrer(modo) {
+      accion(async () => {
+        const inicio = valorSelector('trav-start');
+        const r = await api('GET', '/api/' + modo + '?inicio=' + inicio);
+        limpiarResaltado();
+        const salida = $('trav-output');
+        const titulo = modo === 'bfs' ? 'BFS (a lo ancho, cola)' : 'DFS (en profundidad, pila)';
+        salida.innerHTML = `<div class="text-amber-300 font-semibold mb-1">▶ ${titulo} desde ${esc(nombreDe(r.inicio))}:</div>`;
+        dibujarGrafo();
+
+        const padres = padresRecorrido(r.orden, modo);
+        await animarSecuencia(r.orden, padres, COLORES_RECORRIDO[modo], (id, i) => {
+          const desde = padres.has(id) ? ` <span class="text-slate-500">← ${esc(nombreDe(padres.get(id)))}</span>` : '';
+          salida.insertAdjacentHTML('beforeend', `<div>${i + 1}. <strong>${esc(nombreDe(id))}</strong> (${id})${desde}</div>`);
+          salida.scrollTop = salida.scrollHeight;
+        });
+      });
+    }
+
+    function buscarCamino(tipo) {
+      accion(async () => {
+        const origen = valorSelector('trav-start');
+        const destino = valorSelector('trav-end');
+        const r = await api('GET', '/api/' + tipo + '?origen=' + origen + '&destino=' + destino);
+        limpiarResaltado();
+        const salida = $('trav-output');
+
+        if (!r.encontrado) {
+          salida.innerHTML = `<div class="text-rose-400">No hay camino de Amistad de ${esc(nombreDe(origen))} hacia ${esc(nombreDe(destino))}.</div>`;
+          dibujarGrafo();
+          return;
+        }
+
+        const esAfin = tipo === 'camino-afin';
+        const titulo = esAfin
+          ? `💞 Camino de mayor afinidad (${r.pasos} pasos, costo ${r.costo.toFixed(3)})`
+          : `✓ Camino con menos saltos (${r.pasos} pasos)`;
+        let detalle = r.camino.map((id) => esc(nombreDe(id))).join(' → ');
+        if (esAfin) {
+          detalle = r.camino.map((id, i) => esc(nombreDe(id)) + (i < r.pesos.length ? ` <span class="text-fuchsia-300">─${formatoPeso(r.pesos[i])}→</span>` : '')).join(' ');
+        }
+        salida.innerHTML = `<div class="${esAfin ? 'text-fuchsia-300' : 'text-emerald-400'} font-semibold mb-1">${titulo}:</div><div>${detalle}</div>`;
+        if (esAfin) {
+          salida.insertAdjacentHTML('beforeend', '<div class="text-slate-500 mt-1">Costo = Σ 1/afinidad. Menor costo = amistades más cercanas.</div>');
+        }
+        dibujarGrafo();
+
+        const padres = new Map();
+        r.camino.forEach((id, i) => { if (i > 0) padres.set(id, r.camino[i - 1]); });
+        await animarSecuencia(r.camino, padres, COLORES_RECORRIDO[tipo], () => {});
+      });
+    }
+
+    // Efectos de animación
+
+    function trayectoViaje(u, v) {
+      const pu = posiciones.get(u);
+      const pv = posiciones.get(v);
+      if (vistaCompacta) {
+        const a = puntoEnBorde(pu, pv);
+        const b = puntoEnBorde(pv, pu);
+        return `M ${a.x} ${a.y} L ${b.x} ${b.y}`;
+      }
+      return curva(pu, pv);
+    }
+
+    /** Mueve un punto brillante por el arco u → v. Devuelve false si se canceló. */
+    function viajar(u, v, color, duracion, miToken) {
+      return new Promise((resolve) => {
+        if (!posiciones.get(u) || !posiciones.get(v)) { resolve(true); return; }
+        const capa = $('layer-fx');
+        const d = trayectoViaje(u, v);
+        const guia = crearSvg('path', { d, fill: 'none', stroke: 'none' });
+        capa.appendChild(guia);
+        const largo = guia.getTotalLength() || 1;
+        const estela = crearSvg('path', {
+          d, fill: 'none', stroke: color, 'stroke-width': 6, 'stroke-linecap': 'round',
+          opacity: 0.35, 'stroke-dasharray': largo, 'stroke-dashoffset': largo
+        });
+        const punto = crearSvg('circle', { r: 7, fill: color, filter: 'url(#brillo)' });
+        capa.append(estela, punto);
+        const t0 = performance.now();
+        const limpiar = () => { guia.remove(); estela.remove(); punto.remove(); };
+
+        function paso(ahora) {
+          if (miToken !== tokenAnimacion) { limpiar(); resolve(false); return; }
+          const t = Math.min(1, (ahora - t0) / duracion);
+          const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          const p = guia.getPointAtLength(largo * e);
+          punto.setAttribute('cx', p.x);
+          punto.setAttribute('cy', p.y);
+          estela.setAttribute('stroke-dashoffset', largo * (1 - e));
+          if (t < 1) requestAnimationFrame(paso);
+          else { limpiar(); resolve(true); }
+        }
+        requestAnimationFrame(paso);
+      });
+    }
+
+    function pulso(id, color) {
+      const p = posiciones.get(id);
+      if (!p) return;
+      const anillo = crearSvg('rect', {
+        x: p.x - MEDIO_ANCHO, y: p.y - MEDIO_ALTO, width: MEDIO_ANCHO * 2, height: MEDIO_ALTO * 2, rx: 18,
+        fill: 'none', stroke: color, 'stroke-width': 3, class: 'pulso'
+      });
+      $('layer-pulsos').appendChild(anillo);
+      setTimeout(() => anillo.remove(), 950);
+    }
+
+    // Influencia
+
+    async function actualizarInfluencia() {
+      const miToken = ++tokenInfluencia;
+      try {
+        const r = await api('GET', '/api/influencia');
+        if (miToken !== tokenInfluencia) return;
+        rankingActual = r.ranking;
+      } catch (e) {
+        if (miToken !== tokenInfluencia) return;
+        rankingActual = [];
+        mostrarAviso(e.message, true);
+      }
+      dibujarInfluencia();
+    }
+
+    function dibujarInfluencia() {
+      const tope = rankingActual[0];
+      $('stat-influencer').textContent = tope
+        ? tope.nombre + ' · ' + tope.centralidadIntermediacion.toFixed(3)
+        : '—';
+
+      const maximo = Math.max(...rankingActual.map((r) => r.centralidadIntermediacion), 0.0001);
+      $('tabla-influencia').innerHTML = rankingActual.length
+        ? rankingActual.map((r, i) => `
+            <tr class="border-b border-slate-100 last:border-0">
+              <td class="py-1.5 pr-2 text-slate-400">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td>
+              <td class="py-1.5 pr-2 font-sans font-semibold text-slate-800">
+                ${esc(r.nombre)} <span class="text-slate-400 font-mono-code">(${r.id})</span>
+                <div class="h-1 mt-1 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width:${(100 * r.centralidadIntermediacion / maximo).toFixed(0)}%"></div></div>
+              </td>
+              <td class="py-1.5 pr-2 text-right">${r.centralidadIntermediacion.toFixed(3)}</td>
+              <td class="py-1.5 pr-2 text-right">${r.gradoEntrada}</td>
+              <td class="py-1.5 pr-2 text-right">${r.gradoSalida}</td>
+              <td class="py-1.5 text-right">${r.centralidadGrado.toFixed(3)}</td>
+            </tr>`).join('')
+        : '<tr><td colspan="6" class="py-3 text-center text-slate-400 font-sans">Sin estudiantes.</td></tr>';
+    }
+
+    // Datos
+
+    async function cargarTexto(texto) {
+      const nuevasPosiciones = new Map();
+      try {
+        const datos = JSON.parse(texto);
+        if (datos && Array.isArray(datos.usuarios)) {
+          datos.usuarios.forEach((u) => {
+            if (u && typeof u.id === 'number' && typeof u.x === 'number' && typeof u.y === 'number') {
+              nuevasPosiciones.set(u.id, { x: u.x, y: u.y });
+            }
+          });
+        }
+      } catch (e) {
+        // Si el JSON está mal, Java responde con el error
+      }
+
+      const respaldo = posiciones;
+      posiciones = new Map();
+      try {
+        const nuevo = await api('POST', '/api/cargar', texto);
+        usuarioActivo = null;
+        // Se parte de un círculo y se anima hacia las posiciones del archivo (o se organiza por fuerzas)
+        aplicarEstado(nuevo);
+        if (nuevasPosiciones.size === nuevo.usuarios.length && nuevo.usuarios.length > 0) {
+          animarPosiciones(new Map([...nuevasPosiciones].map(([id, p]) => [id, limitar(p)])), 900);
+        }
+      } catch (e) {
+        posiciones = respaldo;
+        throw e;
+      }
+    }
+
+    function cargarArchivoSeleccionado() {
+      const archivo = $('archivo-json').files[0];
+      if (!archivo) {
+        mostrarAviso('Elige un archivo primero', true);
+        return;
+      }
+      accion(async () => {
+        await cargarTexto(await archivo.text());
+        mostrarAviso('Archivo cargado: ' + archivo.name);
+      });
+    }
+
+    function cargarEjemplo(nombre) {
+      accion(async () => {
+        const ejemplo = await api('GET', '/api/ejemplos/' + nombre);
+        await cargarTexto(JSON.stringify(ejemplo));
+        mostrarAviso('Ejemplo cargado: ' + nombre);
+      });
+    }
+
+    // Tarjeta de estudiante
+
+    function arcosSalientes(id) {
+      const lista = [];
+      for (const r of estado.relaciones) {
+        if (r.a === id) lista.push({ otro: r.b, tipo: r.tipoAB, peso: r.pesoAB });
+        else if (r.b === id) lista.push({ otro: r.a, tipo: r.tipoBA, peso: r.pesoBA });
+      }
+      return lista;
+    }
+
+    function arcosEntrantes(id) {
+      const lista = [];
+      for (const r of estado.relaciones) {
+        if (r.a === id) lista.push({ otro: r.b, tipo: r.tipoBA, peso: r.pesoBA });
+        else if (r.b === id) lista.push({ otro: r.a, tipo: r.tipoAB, peso: r.pesoAB });
+      }
+      return lista;
+    }
+
+    function abrirTarjeta(id) {
+      if (usuarioActivo !== id) {
+        $('pop-editar').classList.add('hidden');
+        $('pop-editar').classList.remove('grid');
+      }
+      usuarioActivo = id;
+      actualizarTarjeta();
+      dibujarGrafo();
+    }
+
+    function cerrarTarjeta() {
+      usuarioActivo = null;
+      actualizarTarjeta();
+      dibujarGrafo();
+    }
+
+    function cambiarPestanaTarjeta(pestana) {
+      pestanaTarjeta = pestana;
+      actualizarTarjeta();
+    }
+
+    function actualizarTarjeta() {
+      const popover = $('user-social-popover');
+      const botonReset = $('btn-reset-focus');
+      const usuario = usuarioActivo === null ? null : usuarioPorId(usuarioActivo);
+
+      if (!usuario) {
+        popover.classList.add('hidden');
+        botonReset.classList.add('hidden');
+        return;
+      }
+
+      const salientes = arcosSalientes(usuario.id);
+      const entrantes = arcosEntrantes(usuario.id);
+
+      $('pop-avatar').textContent = iniciales(usuario.nombre);
+      $('pop-name').textContent = usuario.nombre;
+      const perfil = textoPerfil(usuario);
+      $('pop-perfil').innerHTML =
+        `<span class="font-mono-code text-slate-400">ID ${usuario.id}</span>` +
+        (perfil ? ' · ' + perfil : '') +
+        (usuario.correo ? `<br><span class="text-indigo-600">${esc(usuario.correo)}</span>` : '');
+      $('count-out').textContent = salientes.length;
+      $('count-in').textContent = entrantes.length;
+
+      ['salientes', 'entrantes'].forEach((p) => {
+        const activa = p === pestanaTarjeta;
+        const boton = $('pop-tab-' + p);
+        boton.classList.toggle('bg-white', activa);
+        boton.classList.toggle('shadow-sm', activa);
+        boton.classList.toggle('font-bold', activa);
+        boton.classList.toggle('text-slate-900', activa);
+        boton.classList.toggle('font-semibold', !activa);
+        boton.classList.toggle('text-slate-600', !activa);
+      });
+
+      const lista = pestanaTarjeta === 'salientes' ? salientes : entrantes;
+      $('pop-list-content').innerHTML = lista.length
+        ? lista.map((item) => {
+            const color = colorDe(item.tipo);
+            return `<div class="flex items-center justify-between p-2 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-white" onclick="abrirTarjeta(${item.otro})">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="min-w-6 h-6 px-1 rounded-full text-white font-mono-code text-[10px] font-bold flex items-center justify-center" style="background:${color}">${item.otro}</span>
+                <span class="font-semibold text-slate-800 truncate">${esc(nombreDe(item.otro))}</span>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                ${item.tipo === 'AMISTAD' ? `<span class="text-[10px] font-mono-code text-fuchsia-600">♥ ${formatoPeso(item.peso)}</span>` : ''}
+                <span class="text-[10px] font-mono-code font-bold px-2 py-0.5 rounded-full" style="background:${color}22;color:${color}">${esc(etiquetaDe(item.tipo))}</span>
+              </div>
+            </div>`;
+          }).join('')
+        : '<div class="p-3 rounded-xl bg-slate-50 text-slate-500 text-center">Sin relaciones.</div>';
+
+      popover.classList.remove('hidden');
+      botonReset.classList.remove('hidden');
+    }
+
+    // Paneles de información
+
+    function actualizarTodo() {
+      actualizarSelectores();
+      actualizarContadores();
+      dibujarLeyenda();
+      dibujarEstructura();
+      actualizarTarjeta();
+      dibujarGrafo();
+      actualizarInfluencia();
+    }
+
+    function actualizarSelectores() {
+      const opciones = estado.usuarios
+        .map((u) => `<option value="${u.id}">${esc(u.nombre)} (${u.id})</option>`)
+        .join('');
+
+      const selectoresDestino = ['edge-target', 'anal-b', 'trav-end'];
+      ['remove-user-select', 'edge-source', 'edge-target', 'anal-a', 'anal-b', 'sug-user', 'trav-start', 'trav-end']
+        .forEach((id) => {
+          const el = $(id);
+          const previo = el.value;
+          el.innerHTML = opciones;
+          if (previo && usuarioPorId(Number(previo))) {
+            el.value = previo;
+          } else if (selectoresDestino.includes(id) && estado.usuarios.length > 1) {
+            el.value = String(estado.usuarios[1].id);
+          }
+        });
+
+      const selectorTipo = $('edge-type');
+      const tipoPrevio = selectorTipo.value;
+      selectorTipo.innerHTML = estado.tipos
+        .map((t) => `<option value="${esc(t.nombre)}">${esc(t.etiqueta)}</option>`)
+        .join('');
+      if (tipoPrevio && estado.tipos.some((t) => t.nombre === tipoPrevio)) {
+        selectorTipo.value = tipoPrevio;
+      } else if (estado.tipos.some((t) => t.nombre === 'AMISTAD')) {
+        selectorTipo.value = 'AMISTAD';
+      }
+      $('edge-peso').max = estado.pesoMaximo || 10;
+    }
+
+    function actualizarContadores() {
+      const mutuas = estado.relaciones.filter((r) => r.tipoAB === 'AMISTAD' && r.tipoBA === 'AMISTAD').length;
+      $('badge-node-count').textContent = estado.usuarios.length + ' estudiantes';
+      $('stat-estudiantes').textContent = estado.usuarios.length;
+      $('stat-pares').textContent = estado.relaciones.length;
+      $('stat-mutuas').textContent = mutuas;
+      $('vacio-grafo').classList.toggle('hidden', estado.usuarios.length > 0);
+    }
+
+    function dibujarLeyenda() {
+      $('legend-tipos').innerHTML = estado.tipos.map((t) => {
+        const color = colorDe(t.nombre);
+        return `<span class="flex items-center gap-1.5 text-slate-700">
+          <span class="w-3 h-3 rounded-full inline-block" style="background:${color}"></span>${esc(t.etiqueta)}
+        </span>`;
+      }).join('');
+    }
+
+    function insignia(flecha, a) {
+      const color = colorDe(a.tipo);
+      const peso = a.tipo === 'AMISTAD' ? ' · ' + formatoPeso(a.peso) : '';
+      return `<span class="px-1.5 py-0.5 rounded-md font-mono-code font-semibold text-[10px]" style="background:${color}1F;color:${color}" title="${esc(nombreDe(a.otro))}: ${esc(etiquetaDe(a.tipo))}">${flecha}${a.otro}${peso}</span>`;
+    }
+
+    function dibujarEstructura() {
+      const contenedor = $('adjacency-list-view');
+      if (!estado.usuarios.length) {
+        contenedor.innerHTML = '<span class="text-slate-400">Sin estudiantes.</span>';
+        return;
+      }
+      contenedor.innerHTML = estado.usuarios.map((u) => {
+        const salientes = arcosSalientes(u.id);
+        const entrantes = arcosEntrantes(u.id);
+        const fila = (lista, flecha) => lista.length
+          ? lista.map((a) => insignia(flecha, a)).join(' ')
+          : '<span class="text-slate-300">—</span>';
+        return `<div class="py-1.5 border-b border-slate-100 last:border-0">
+          <div class="font-semibold text-slate-800 mb-1">${esc(u.nombre)} <span class="text-slate-400 font-mono-code">(${u.id})</span></div>
+          <div class="flex items-start gap-1.5 mb-0.5"><span class="text-[10px] text-slate-400 w-14 shrink-0 pt-0.5">salientes</span><div class="flex flex-wrap gap-1">${fila(salientes, '→')}</div></div>
+          <div class="flex items-start gap-1.5"><span class="text-[10px] text-slate-400 w-14 shrink-0 pt-0.5">entrantes</span><div class="flex flex-wrap gap-1">${fila(entrantes, '←')}</div></div>
+        </div>`;
+      }).join('');
+    }
+
+    // Dibujo del grafo
+
+    function crearSvg(etiqueta, atributos) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', etiqueta);
+      for (const clave in atributos) el.setAttribute(clave, atributos[clave]);
+      return el;
+    }
+
+    function puntoEnBorde(centro, hacia) {
+      const dx = hacia.x - centro.x;
+      const dy = hacia.y - centro.y;
+      if (dx === 0 && dy === 0) return { x: centro.x, y: centro.y };
+      const tx = dx === 0 ? Infinity : MEDIO_ANCHO / Math.abs(dx);
+      const ty = dy === 0 ? Infinity : MEDIO_ALTO / Math.abs(dy);
+      const t = Math.min(tx, ty);
+      return { x: centro.x + dx * t, y: centro.y + dy * t };
+    }
+
+    function puntosCurva(desde, hasta) {
+      const dx = hasta.x - desde.x;
+      const dy = hasta.y - desde.y;
+      const largo = Math.hypot(dx, dy) || 1;
+      const control = {
+        x: (desde.x + hasta.x) / 2 - (dy / largo) * 46,
+        y: (desde.y + hasta.y) / 2 + (dx / largo) * 46
+      };
+      return { inicio: puntoEnBorde(desde, control), control, fin: puntoEnBorde(hasta, control) };
+    }
+
+    function curva(desde, hasta) {
+      const { inicio, control, fin } = puntosCurva(desde, hasta);
+      return `M ${inicio.x} ${inicio.y} Q ${control.x} ${control.y} ${fin.x} ${fin.y}`;
+    }
+
+    function geometriaArco(desde, hasta, medioCompacto) {
+      if (vistaCompacta) {
+        const fin = puntoEnBorde(hasta, desde);
+        return {
+          d: `M ${medioCompacto.x} ${medioCompacto.y} L ${fin.x} ${fin.y}`,
+          etiqueta: { x: medioCompacto.x + (fin.x - medioCompacto.x) * 0.45, y: medioCompacto.y + (fin.y - medioCompacto.y) * 0.45 }
+        };
+      }
+      const { inicio, control, fin } = puntosCurva(desde, hasta);
+      return {
+        d: `M ${inicio.x} ${inicio.y} Q ${control.x} ${control.y} ${fin.x} ${fin.y}`,
+        etiqueta: {
+          x: 0.25 * inicio.x + 0.5 * control.x + 0.25 * fin.x,
+          y: 0.25 * inicio.y + 0.5 * control.y + 0.25 * fin.y
+        }
+      };
+    }
+
+    function dibujarArco(capa, geometria, tipo, peso, atenuado, resaltado) {
+      const desconocido = tipo === 'DESCONOCIDO';
+      const color = resaltado ? COLOR_RESALTE : colorDe(tipo);
+      const ancho = resaltado ? 3.8 : (desconocido ? 1.6 : 1.4 + Math.min(peso, 10) * 0.32);
+      const trazo = crearSvg('path', {
+        d: geometria.d,
+        fill: 'none',
+        stroke: color,
+        'stroke-width': ancho.toFixed(2),
+        'stroke-linecap': 'round',
+        'marker-end': 'url(#flecha-' + color.slice(1) + ')'
+      });
+      if (resaltado) trazo.setAttribute('class', 'arco-flujo');
+      else if (desconocido) trazo.setAttribute('stroke-dasharray', '4 4');
+      if (atenuado) trazo.style.opacity = 0.12;
+      else if (desconocido && !resaltado) trazo.style.opacity = 0.6;
+      capa.appendChild(trazo);
+
+      if (mostrarAfinidad && tipo === 'AMISTAD' && !atenuado) {
+        const g = crearSvg('g', { transform: `translate(${geometria.etiqueta.x}, ${geometria.etiqueta.y})` });
+        g.appendChild(crearSvg('rect', { x: -10, y: -8, width: 20, height: 16, rx: 8, fill: '#FFFFFF', stroke: color, 'stroke-width': 1.2 }));
+        const texto = crearSvg('text', {
+          x: 0, y: 3.5, 'text-anchor': 'middle',
+          'font-family': 'JetBrains Mono, monospace', 'font-size': 9.5, 'font-weight': 700, fill: '#A21CAF'
+        });
+        texto.textContent = formatoPeso(peso);
+        g.appendChild(texto);
+        capa.appendChild(g);
+      }
+    }
+
+    function conjuntoEnfoque() {
+      const conjunto = new Set();
+      if (usuarioActivo === null) return conjunto;
+      conjunto.add(usuarioActivo);
+      for (const r of estado.relaciones) {
+        if (r.a === usuarioActivo) conjunto.add(r.b);
+        if (r.b === usuarioActivo) conjunto.add(r.a);
+      }
+      return conjunto;
+    }
+
+    function dibujarGrafo() {
+      const capaFlechas = $('defs-flechas');
+      const capaAristas = $('layer-edges');
+      const capaNodos = $('layer-nodes');
+      capaFlechas.replaceChildren();
+      capaAristas.replaceChildren();
+      capaNodos.replaceChildren();
+
+      const colores = new Set([COLOR_DEFECTO, COLOR_RESALTE, ...estado.tipos.map((t) => colorDe(t.nombre))]);
+      colores.forEach((color) => {
+        const marcador = crearSvg('marker', {
+          id: 'flecha-' + color.slice(1),
+          viewBox: '0 0 10 10',
+          refX: 9,
+          refY: 5,
+          markerWidth: 11,
+          markerHeight: 11,
+          markerUnits: 'userSpaceOnUse',
+          orient: 'auto'
+        });
+        marcador.appendChild(crearSvg('path', { d: 'M 0 1 L 10 5 L 0 9 z', fill: color }));
+        capaFlechas.appendChild(marcador);
+      });
+
+      const hayArcosResaltados = resaltadoArcos.size > 0;
+      for (const r of estado.relaciones) {
+        const pa = posiciones.get(r.a);
+        const pb = posiciones.get(r.b);
+        if (!pa || !pb) continue;
+        const fueraDeEnfoque = usuarioActivo !== null && r.a !== usuarioActivo && r.b !== usuarioActivo;
+
+        const resaltadoAB = resaltadoArcos.has(r.a + '>' + r.b);
+        const resaltadoBA = resaltadoArcos.has(r.b + '>' + r.a);
+        const atenuadoAB = fueraDeEnfoque || (hayArcosResaltados && !resaltadoAB);
+        const atenuadoBA = fueraDeEnfoque || (hayArcosResaltados && !resaltadoBA);
+
+        const bordeA = puntoEnBorde(pa, pb);
+        const bordeB = puntoEnBorde(pb, pa);
+        const medio = { x: (bordeA.x + bordeB.x) / 2, y: (bordeA.y + bordeB.y) / 2 };
+        dibujarArco(capaAristas, geometriaArco(pa, pb, medio), r.tipoAB, r.pesoAB, atenuadoAB, resaltadoAB);
+        dibujarArco(capaAristas, geometriaArco(pb, pa, medio), r.tipoBA, r.pesoBA, atenuadoBA, resaltadoBA);
+      }
+
+      const enfoque = conjuntoEnfoque();
+      for (const usuario of estado.usuarios) {
+        const p = posiciones.get(usuario.id);
+        if (!p) continue;
+
+        const seleccionado = usuarioActivo === usuario.id;
+        const resaltado = resaltadoNodos.has(usuario.id);
+        const g = crearSvg('g', { transform: `translate(${p.x}, ${p.y})` });
+        g.style.cursor = 'grab';
+        if (usuarioActivo !== null && !enfoque.has(usuario.id)) g.style.opacity = '0.25';
+
+        const cuerpo = crearSvg('g', {});
+        if (nodosNuevos.has(usuario.id)) cuerpo.setAttribute('class', 'nodo-nuevo');
+        g.appendChild(cuerpo);
+
+        const comunidades = comunidadesVista
+          ? comunidadesVista.filter((c) => c.miembros.includes(usuario.id))
+          : [];
+        comunidades.forEach((c, k) => {
+          const margen = 5 + 6 * k;
+          cuerpo.appendChild(crearSvg('rect', {
+            x: -52 - margen, y: -36 - margen,
+            width: 104 + 2 * margen, height: 72 + 2 * margen, rx: 18 + margen,
+            fill: 'none', stroke: colorComunidad(c.id), 'stroke-width': 3
+          }));
+        });
+
+        cuerpo.appendChild(crearSvg('rect', {
+          x: -52, y: -36, width: 104, height: 72, rx: 18,
+          fill: resaltado ? '#FFFBEB' : '#FFFFFF',
+          stroke: resaltado ? COLOR_RESALTE : (seleccionado ? '#4F46E5' : '#E2E8F0'),
+          'stroke-width': resaltado || seleccionado ? 2.5 : 1.5,
+          filter: 'url(#card-shadow)'
+        }));
+
+        cuerpo.appendChild(crearSvg('circle', {
+          cx: -33, cy: -17, r: 11, fill: resaltado ? COLOR_RESALTE : '#4F46E5'
+        }));
+
+        const textoId = crearSvg('text', {
+          x: -33, y: -13.5, 'text-anchor': 'middle',
+          'font-family': 'JetBrains Mono, monospace', 'font-size': 9, 'font-weight': 700, fill: '#FFFFFF'
+        });
+        textoId.textContent = usuario.id;
+        cuerpo.appendChild(textoId);
+
+        const textoNombre = crearSvg('text', {
+          x: -17, y: -14,
+          'font-family': 'Plus Jakarta Sans, sans-serif', 'font-size': 11.5, 'font-weight': 700, fill: '#0F172A'
+        });
+        textoNombre.textContent = usuario.nombre.length > 8 ? usuario.nombre.slice(0, 7) + '…' : usuario.nombre;
+        cuerpo.appendChild(textoNombre);
+
+        const subtitulo = usuario.carrera
+          ? usuario.carrera + (usuario.semestre ? ' · ' + usuario.semestre + '°' : '')
+          : '← ' + usuario.gradoEntrada + '  → ' + usuario.gradoSalida;
+        const textoCarrera = crearSvg('text', {
+          x: -44, y: 1,
+          'font-family': 'Plus Jakarta Sans, sans-serif', 'font-size': 8.5, 'font-weight': 600, fill: '#64748B'
+        });
+        textoCarrera.textContent = subtitulo.length > 19 ? subtitulo.slice(0, 18) + '…' : subtitulo;
+        cuerpo.appendChild(textoCarrera);
+
+        const grupoBoton = crearSvg('g', {});
+        grupoBoton.style.cursor = 'pointer';
+        grupoBoton.appendChild(crearSvg('rect', {
+          x: -42, y: 8, width: 84, height: 20, rx: 10,
+          fill: seleccionado ? '#4F46E5' : '#EEF2FF'
+        }));
+        const textoBoton = crearSvg('text', {
+          x: 0, y: 21.5, 'text-anchor': 'middle',
+          'font-family': 'Plus Jakarta Sans, sans-serif', 'font-size': 10, 'font-weight': 700,
+          fill: seleccionado ? '#FFFFFF' : '#4338CA'
+        });
+        textoBoton.textContent = 'Ver perfil';
+        grupoBoton.appendChild(textoBoton);
+        grupoBoton.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          abrirTarjeta(usuario.id);
+        });
+        cuerpo.appendChild(grupoBoton);
+
+        if (ordenVisita.has(usuario.id)) {
+          cuerpo.appendChild(crearSvg('circle', { cx: 46, cy: -30, r: 11, fill: '#0F172A' }));
+          const textoOrden = crearSvg('text', {
+            x: 46, y: -26.5, 'text-anchor': 'middle',
+            'font-family': 'JetBrains Mono, monospace', 'font-size': 10, 'font-weight': 700, fill: '#FFFFFF'
+          });
+          textoOrden.textContent = ordenVisita.get(usuario.id);
+          cuerpo.appendChild(textoOrden);
+        }
+
+        g.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          tokenLayout++;
+          arrastrando = usuario.id;
+          huboArrastre = false;
+        });
+
+        capaNodos.appendChild(g);
+      }
+    }
+
+    // Arrastre de tarjetas
+
+    svgEl.addEventListener('mousemove', (e) => {
+      if (arrastrando === null) return;
+      huboArrastre = true;
+      const punto = svgEl.createSVGPoint();
+      punto.x = e.clientX;
+      punto.y = e.clientY;
+      const local = punto.matrixTransform(svgEl.getScreenCTM().inverse());
+      posiciones.set(arrastrando, limitar({ x: local.x, y: local.y }));
+      dibujarGrafo();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (arrastrando !== null && !huboArrastre) abrirTarjeta(arrastrando);
+      arrastrando = null;
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !$('splash').classList.contains('hidden')) cerrarSplash();
+    });
+
+    // Inicio
+
+    // Atajos para presentar: #demo carga la clase de ejemplo, #app salta la portada
+    dibujarConstelacion();
+    restaurarVacios();
+    if (location.hash === '#app' || location.hash === '#demo') {
+      $('splash').classList.add('hidden', 'splash-salida');
+    }
+    accion(async () => {
+      aplicarEstado(await api('GET', '/api/estado'));
+      if (location.hash === '#demo') cargarEjemplo('estudiantes');
+    });
+  </script>
+</body>
+</html>

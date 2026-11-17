@@ -1,0 +1,22 @@
+{
+  "usuarios": [
+    {"id": 1, "nombre": "Ana", "carrera": "Software", "semestre": 1, "edad": 18, "correo": "ana@uni.edu", "x": 190, "y": 130},
+    {"id": 2, "nombre": "Bruno", "carrera": "Telecomunicaciones", "semestre": 4, "edad": 20, "correo": "bruno@uni.edu", "x": 320, "y": 80},
+    {"id": 3, "nombre": "Carla", "carrera": "Industrial", "semestre": 7, "edad": 22, "correo": "carla@uni.edu", "x": 290, "y": 270},
+    {"id": 4, "nombre": "Diego", "carrera": "Diseño", "semestre": 2, "edad": 18, "correo": "diego@uni.edu", "x": 430, "y": 190},
+    {"id": 5, "nombre": "Elena", "carrera": "Software", "semestre": 5, "edad": 20, "correo": "elena@uni.edu", "x": 570, "y": 230},
+    {"id": 6, "nombre": "Fabián", "carrera": "Telecomunicaciones", "semestre": 8, "edad": 22, "correo": "fabian@uni.edu", "x": 690, "y": 120},
+    {"id": 7, "nombre": "Gaby", "carrera": "Industrial", "semestre": 3, "edad": 18, "correo": "gaby@uni.edu", "x": 700, "y": 350}
+  ],
+  "relaciones": [
+    {"a": 1, "b": 2, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 5, "pesoBA": 4},
+    {"a": 1, "b": 3, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 3},
+    {"a": 2, "b": 3, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 4, "pesoBA": 5},
+    {"a": 2, "b": 4, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 2},
+    {"a": 3, "b": 4, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 4, "pesoBA": 3},
+    {"a": 5, "b": 6, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 5, "pesoBA": 5},
+    {"a": 5, "b": 7, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 3, "pesoBA": 4},
+    {"a": 6, "b": 7, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 4, "pesoBA": 3},
+    {"a": 4, "b": 5, "tipoAB": "AMISTAD", "tipoBA": "AMISTAD", "pesoAB": 2, "pesoBA": 2}
+  ]
+}

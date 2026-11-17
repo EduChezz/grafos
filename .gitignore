@@ -1,0 +1,8 @@
+# Compilados de Maven
+target/
+
+# Archivos temporales de herramientas del editor
+.github/modernize/
+.vscode/
+.idea/
+*.class
